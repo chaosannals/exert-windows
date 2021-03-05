@@ -10,7 +10,7 @@ void bypsapi() {
     if (EnumProcesses(ids, sizeof(ids), &size)) {
         std::cout << "size:\n" << size << std::endl;
         for (DWORD i = 0; i != size; ++i) {
-            HANDLE h = OpenProcess(PROCESS_ALL_ACCESS, FALSE, ids[i]);
+            HANDLE h = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, ids[i]);
             if (h == nullptr) {
                 std::cout << "IHV: " << GetLastError() << std::endl;
             }
