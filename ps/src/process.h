@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include<Windows.h>
 #include<TlHelp32.h>
 #include<Psapi.h>
@@ -47,7 +47,7 @@ namespace exert {
         return result;
 	}
 
-    // Í¨¹ıÃû×ÖÕÒµ½½ø³Ì¡£
+    // é€šè¿‡åå­—æ‰¾åˆ°è¿›ç¨‹ã€‚
     std::unique_ptr<process_t> find_process_by_name(const std::wstring& name) {
         auto processes = list_processes();
         for (auto p : processes) {

