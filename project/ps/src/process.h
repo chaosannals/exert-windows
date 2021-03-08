@@ -4,17 +4,9 @@
 #include<Psapi.h>
 #include<vector>
 #include<memory>
+#include<exert/base.h>
 
-namespace exert {
-
-    template<typename T> class closer_t {
-        const T handle;
-    public:
-        closer_t(T handle):handle(handle) {}
-        closer_t(const closer_t&) = delete;
-        ~closer_t() { CloseHandle(handle); }
-        operator T() { return handle; }
-    };
+namespace ext {
 
 	struct process_t {
 		DWORD id;
@@ -24,7 +16,7 @@ namespace exert {
 
 	std::vector<process_t> list_processes() {
         std::vector<process_t> result;
-        closer_t<HANDLE> sh = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+        handle_t sh = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
         
         if (sh == INVALID_HANDLE_VALUE) {
             return result;
@@ -37,7 +29,7 @@ namespace exert {
             process_t one;
             one.id = entry.th32ProcessID;
             std::copy(entry.szExeFile, entry.szExeFile + MAX_PATH, one.filename);
-            closer_t<HANDLE> h = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, one.id);
+            handle_t h = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, one.id);
             if (!GetProcessImageFileNameW(h, one.imagename, MAX_PATH)) {
                 one.imagename[0] = '\0';
             }

@@ -10,9 +10,4 @@
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="util.h">
-      <Filter>src</Filter>
-    </ClInclude>
-  </ItemGroup>
 </Project>

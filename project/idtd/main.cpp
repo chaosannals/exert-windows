@@ -1,8 +1,9 @@
 #include<Windows.h>
-#include "util.h"
+#include<cstddef>
+#include<exert/base.h>
 
 int make_file() {
-	closer_t<HANDLE> handle = CreateFileW(
+	ext::handle_t handle = CreateFileW(
 		L"idtd.log",
 		GENERIC_WRITE,
 		0,
@@ -19,5 +20,6 @@ int make_file() {
 
 int WINAPI WinMain(HINSTANCE self, HINSTANCE prev, LPSTR argv, int argc) {
 	make_file();
+	std::size_t a = 123;
 	return 0;
 }

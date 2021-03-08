@@ -19,6 +19,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rshd", "project\rshd\rshd.v
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "idtsh", "project\idtsh\idtsh.vcxproj", "{E971B84D-F55F-490C-827F-555014EC5B22}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{0AF31D22-18EA-4E4F-84EC-9BFC796737DB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "exploit", "exploit", "{433F327A-5EAC-49FE-86B0-E42E62753E5E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -70,6 +74,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0AF31D22-18EA-4E4F-84EC-9BFC796737DB} = {253B8148-EAC6-492C-B70A-72FD615E315B}
+		{433F327A-5EAC-49FE-86B0-E42E62753E5E} = {253B8148-EAC6-492C-B70A-72FD615E315B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {47B048B1-7776-4D0B-9D79-2C32ED4B3858}
