@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 
+#pragma pack(1)
 struct dos_header_t {
 	char magic_number[2];
 	std::uint16_t last_page_bytes_count;
@@ -22,6 +23,7 @@ struct dos_header_t {
 	std::uint16_t reserved_words_2[10];
 	std::uint32_t new_header_offset;
 };
+#pragma pack()
 
 enum pe_machine_e : std::uint16_t {
 	i386 = 0x014c,
@@ -72,7 +74,9 @@ enum pe_characteristic_e : std::uint16_t {
 	bytes_reversed_hi = 0x8000,
 };
 
+#pragma pack(1)
 struct pe_header_t {
+	char magic_number[4];
 	pe_machine_e machine;
 	std::uint16_t sections_count; // 节数
 	std::uint32_t create_timestamp; // 创建时间戳
@@ -81,18 +85,130 @@ struct pe_header_t {
 	std::uint16_t optional_header_size;
 	pe_characteristic_e characteristics;
 };
+#pragma pack()
 
 enum pe_optional_magic_e : std::uint16_t {
-	nt_optional_32 = 0x10b,
-	nt_optional_64 = 0x20b,
-	rom_optional = 0x107,
+	nt_optional_32 = 0x10b, // 32bit
+	nt_optional_64 = 0x20b, // 64bit
+	rom_optional = 0x107, // ROM
 };
 
-struct pe_optional_header_t {
-	
+enum pe_optional_subsystem_e : std::uint16_t {
+	unknown = 0,
+	native_or_driver = 1,
+	gui = 2,
+	cui = 3,
+	posix = 7,
+	ce = 9,
+	efi_app = 10,
+	efi_boot_driver = 11,
+	efi_runtime_driver = 12,
+	efi_rom = 13,
+	xbox = 14,
 };
 
-struct nt_header_t {
-	char magic_number[4];
-	pe_header_t pe_header;
+enum pe_optional_dll_characteristic_e : std::uint16_t {
+	loading_redirect = 7,
+	force_check = 8,
+	nx = 9,
+	unuse_se = 11,
+	wdm_driver = 14,
+	can_use_console_server = 16,
 };
+
+#pragma pack(1)
+struct pe_optional_header_32_t {
+	pe_optional_magic_e magic;
+	std::uint8_t linker_major_version;
+	std::uint8_t linker_minor_version;
+	std::uint32_t code_size;
+	std::uint32_t data_init_size;
+	std::uint32_t data_uninit_size;
+	std::uint32_t entrypoint_rva; // 程序入口相对虚拟内存地址
+	std::uint32_t code_rva; // 代码基址 RVA
+	std::uint32_t data_rva; // 数据基址 RVA
+	std::uint32_t image_rva; // 镜像基址 RVA
+	std::uint32_t section_align; // 内存对齐
+	std::uint32_t file_align; // 文件对齐
+	std::uint16_t system_major_version;
+	std::uint16_t system_minor_version;
+	std::uint16_t image_major_version;
+	std::uint16_t image_minor_version;
+	std::uint16_t subsystem_major_version;
+	std::uint16_t subsystem_minor_version;
+	std::uint32_t win_version;
+	std::uint32_t image_size;
+	std::uint32_t headers_size;
+	std::uint32_t checksum;
+	pe_optional_subsystem_e subsystem;
+	pe_optional_dll_characteristic_e dll_characteristics;
+	std::uint32_t stack_reserve_size;
+	std::uint32_t stack_commit_size;
+	std::uint32_t heap_reserver_size;
+	std::uint32_t heap_commit_size;
+	std::uint32_t loader_flags;
+	std::uint32_t number_of_rva_and_sizes;
+};
+#pragma pack()
+
+#pragma pack(1)
+struct pe_optional_header_64_t {
+	pe_optional_magic_e magic;
+	std::uint8_t linker_major_version;
+	std::uint8_t linker_minor_version;
+	std::uint32_t code_size;
+	std::uint32_t data_init_size;
+	std::uint32_t data_uninit_size;
+	std::uint32_t entrypoint_rva; // 程序入口相对虚拟内存地址
+	std::uint32_t code_rva; // 代码基址 RVA
+	std::uint64_t image_rva; // 镜像基址 RVA
+	std::uint32_t section_align; // 内存对齐
+	std::uint32_t file_align; // 文件对齐
+	std::uint16_t system_major_version;
+	std::uint16_t system_minor_version;
+	std::uint16_t image_major_version;
+	std::uint16_t image_minor_version;
+	std::uint16_t subsystem_major_version;
+	std::uint16_t subsystem_minor_version;
+	std::uint32_t win_version;
+	std::uint32_t image_size;
+	std::uint32_t headers_size;
+	std::uint32_t checksum;
+	pe_optional_subsystem_e subsystem;
+	pe_optional_dll_characteristic_e dll_characteristics;
+	std::uint64_t stack_reserve_size;
+	std::uint64_t stack_commit_size;
+	std::uint64_t heap_reserver_size;
+	std::uint64_t heap_commit_size;
+	std::uint32_t loader_flags;
+	std::uint32_t data_directory_count; // 数据目录个数 固定 16 个
+};
+#pragma pack()
+
+#pragma pack(1)
+struct pe_data_directory_t {
+	std::uint32_t rva;
+	std::uint32_t size;
+};
+#pragma pack()
+
+#pragma pack(1)
+struct pe_data_directory_list_t {
+	pe_data_directory_t export_table;
+	pe_data_directory_t import_table;
+	pe_data_directory_t resource_table;
+	pe_data_directory_t exception_table;
+	pe_data_directory_t certificate_table;
+	pe_data_directory_t base_relocation_table;
+	pe_data_directory_t debug;
+	pe_data_directory_t architecture;
+	pe_data_directory_t global_pointer;
+	pe_data_directory_t tls_table;
+	pe_data_directory_t load_config_table;
+	pe_data_directory_t bound_import;
+	pe_data_directory_t import_address_table;
+	pe_data_directory_t delay_import_descriptor;
+	pe_data_directory_t clr_runtime_header;
+	pe_data_directory_t reserve;
+};
+#pragma pack()
