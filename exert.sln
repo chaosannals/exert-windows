@@ -30,6 +30,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pev", "project\pev\pev.vcxp
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cekn", "project\cekn\cekn.vcxproj", "{73866D25-9804-42EE-841E-5492D576DD8F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fhv", "project\fhv\fhv.vcxproj", "{F8495363-8BDB-4F27-8F67-1BF4D45039E4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -94,6 +96,14 @@ Global
 		{73866D25-9804-42EE-841E-5492D576DD8F}.Release|x64.Build.0 = Release|x64
 		{73866D25-9804-42EE-841E-5492D576DD8F}.Release|x86.ActiveCfg = Release|Win32
 		{73866D25-9804-42EE-841E-5492D576DD8F}.Release|x86.Build.0 = Release|Win32
+		{F8495363-8BDB-4F27-8F67-1BF4D45039E4}.Debug|x64.ActiveCfg = Debug|x64
+		{F8495363-8BDB-4F27-8F67-1BF4D45039E4}.Debug|x64.Build.0 = Debug|x64
+		{F8495363-8BDB-4F27-8F67-1BF4D45039E4}.Debug|x86.ActiveCfg = Debug|Win32
+		{F8495363-8BDB-4F27-8F67-1BF4D45039E4}.Debug|x86.Build.0 = Debug|Win32
+		{F8495363-8BDB-4F27-8F67-1BF4D45039E4}.Release|x64.ActiveCfg = Release|x64
+		{F8495363-8BDB-4F27-8F67-1BF4D45039E4}.Release|x64.Build.0 = Release|x64
+		{F8495363-8BDB-4F27-8F67-1BF4D45039E4}.Release|x86.ActiveCfg = Release|Win32
+		{F8495363-8BDB-4F27-8F67-1BF4D45039E4}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

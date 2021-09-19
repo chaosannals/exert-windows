@@ -1,4 +1,4 @@
-#include<iostream>
+﻿#include<iostream>
 #include<filesystem>
 #include<fstream>
 #include "petype.h"
@@ -32,9 +32,9 @@ int main(int argc, char *argv[]) {
 		std::cout << std::hex;
 		std::cout << std::setw(8) << std::right << std::setfill('0') << peh->characteristics << std::endl;
 		std::cout << std::setw(8) << std::right << std::setfill('0') << peoh64->magic << std::endl;
+		std::cout << std::setw(8) << std::right << std::setfill('0') << peoh64->dll_characteristics << std::endl;
 		std::cout << std::dec;
 		std::cout << peoh64->subsystem << std::endl;
-		std::cout << peoh64->dll_characteristics << std::endl;
 	}
 	return 0;
 }
