@@ -1,5 +1,7 @@
-#pragma once
+ï»¿#pragma once
 #include <cstdint>
+
+#define BITX(x) (1 << (x - 1))
 
 #pragma pack(1)
 struct dos_header_t {
@@ -78,8 +80,8 @@ enum pe_characteristic_e : std::uint16_t {
 struct pe_header_t {
 	char magic_number[4];
 	pe_machine_e machine;
-	std::uint16_t sections_count; // ½ÚÊý
-	std::uint32_t create_timestamp; // ´´½¨Ê±¼ä´Á
+	std::uint16_t sections_count; // èŠ‚æ•°
+	std::uint32_t create_timestamp; // åˆ›å»ºæ—¶é—´æˆ³
 	std::uint32_t symbol_table; //
 	std::uint32_t symbols_count;
 	std::uint16_t optional_header_size;
@@ -95,25 +97,30 @@ enum pe_optional_magic_e : std::uint16_t {
 
 enum pe_optional_subsystem_e : std::uint16_t {
 	unknown = 0,
-	native_or_driver = 1,
-	gui = 2,
-	cui = 3,
-	posix = 7,
-	ce = 9,
-	efi_app = 10,
-	efi_boot_driver = 11,
+	native = 1,
+	windows_gui = 2,
+	windwos_cui = 3,
+	os2_cui = 5,
+	posix_cui = 7,
+	native_windows = 8,
+	windows_ce_gui = 9,
+	efi_application = 10,
+	efi_boot_service_driver = 11,
 	efi_runtime_driver = 12,
 	efi_rom = 13,
 	xbox = 14,
+	windows_boot_application = 16,
 };
 
 enum pe_optional_dll_characteristic_e : std::uint16_t {
-	loading_redirect = 7,
-	force_check = 8,
-	nx = 9,
-	unuse_se = 11,
-	wdm_driver = 14,
-	can_use_console_server = 16,
+	dynamic_base = BITX(7),
+	force_integrity = BITX(8),
+	nx_compat = BITX(9),
+	no_isolation = BITX(10),
+	no_seh = BITX(11),
+	no_bind = BITX(12),
+	wdm_driver = BITX(14),
+	terminal_server_aware = BITX(16),
 };
 
 #pragma pack(1)
@@ -124,12 +131,12 @@ struct pe_optional_header_32_t {
 	std::uint32_t code_size;
 	std::uint32_t data_init_size;
 	std::uint32_t data_uninit_size;
-	std::uint32_t entrypoint_rva; // ³ÌÐòÈë¿ÚÏà¶ÔÐéÄâÄÚ´æµØÖ·
-	std::uint32_t code_rva; // ´úÂë»ùÖ· RVA
-	std::uint32_t data_rva; // Êý¾Ý»ùÖ· RVA
-	std::uint32_t image_rva; // ¾µÏñ»ùÖ· RVA
-	std::uint32_t section_align; // ÄÚ´æ¶ÔÆë
-	std::uint32_t file_align; // ÎÄ¼þ¶ÔÆë
+	std::uint32_t entrypoint_rva; // ç¨‹åºå…¥å£ç›¸å¯¹è™šæ‹Ÿå†…å­˜åœ°å€
+	std::uint32_t code_rva; // ä»£ç åŸºå€ RVA
+	std::uint32_t data_rva; // æ•°æ®åŸºå€ RVA
+	std::uint32_t image_rva; // é•œåƒåŸºå€ RVA
+	std::uint32_t section_align; // å†…å­˜å¯¹é½
+	std::uint32_t file_align; // æ–‡ä»¶å¯¹é½
 	std::uint16_t system_major_version;
 	std::uint16_t system_minor_version;
 	std::uint16_t image_major_version;
@@ -159,11 +166,11 @@ struct pe_optional_header_64_t {
 	std::uint32_t code_size;
 	std::uint32_t data_init_size;
 	std::uint32_t data_uninit_size;
-	std::uint32_t entrypoint_rva; // ³ÌÐòÈë¿ÚÏà¶ÔÐéÄâÄÚ´æµØÖ·
-	std::uint32_t code_rva; // ´úÂë»ùÖ· RVA
-	std::uint64_t image_rva; // ¾µÏñ»ùÖ· RVA
-	std::uint32_t section_align; // ÄÚ´æ¶ÔÆë
-	std::uint32_t file_align; // ÎÄ¼þ¶ÔÆë
+	std::uint32_t entrypoint_rva; // ç¨‹åºå…¥å£ç›¸å¯¹è™šæ‹Ÿå†…å­˜åœ°å€
+	std::uint32_t code_rva; // ä»£ç åŸºå€ RVA
+	std::uint64_t image_rva; // é•œåƒåŸºå€ RVA
+	std::uint32_t section_align; // å†…å­˜å¯¹é½
+	std::uint32_t file_align; // æ–‡ä»¶å¯¹é½
 	std::uint16_t system_major_version;
 	std::uint16_t system_minor_version;
 	std::uint16_t image_major_version;
@@ -181,7 +188,7 @@ struct pe_optional_header_64_t {
 	std::uint64_t heap_reserver_size;
 	std::uint64_t heap_commit_size;
 	std::uint32_t loader_flags;
-	std::uint32_t data_directory_count; // Êý¾ÝÄ¿Â¼¸öÊý ¹Ì¶¨ 16 ¸ö
+	std::uint32_t data_directory_count; // æ•°æ®ç›®å½•ä¸ªæ•° å›ºå®š 16 ä¸ª
 };
 #pragma pack()
 
