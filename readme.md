@@ -15,3 +15,5 @@
 # 查看动态库依赖。
 dumpbin /dependents <path_to_exe>
 ```
+
+注：部分项目引用了外部二进制包，这些包没有Debug包，所以Debug不可构建。
