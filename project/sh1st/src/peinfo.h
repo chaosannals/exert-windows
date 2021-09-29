@@ -2,6 +2,16 @@
 
 #include <Windows.h>
 
+class pefile_t {
+	DWORD length;
+	char* buffer;
+public:
+	pefile_t(char *p, DWORD l):buffer(p), length(l) {}
+	~pefile_t() {
+		if (buffer) delete[] buffer;
+	}
+};
+
 typedef struct NEW_IID {
 	DWORD FirstThunk;
 	DWORD Name;

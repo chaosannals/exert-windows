@@ -14,5 +14,8 @@
     <ClInclude Include="src\peinfo.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\pack.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
