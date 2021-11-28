@@ -11,6 +11,7 @@ namespace ext {
 	struct process_t {
 		DWORD id;
         WCHAR filename[MAX_PATH];
+        WCHAR modulename[MAX_PATH];
         WCHAR imagename[MAX_PATH];
 	};
 
@@ -30,6 +31,11 @@ namespace ext {
             one.id = entry.th32ProcessID;
             std::copy(entry.szExeFile, entry.szExeFile + MAX_PATH, one.filename);
             handle_t h = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, one.id);
+
+            //if (!GetModuleFileName(h , one.modulename, MAX_PATH)) {
+            //    one.modulename[0] = '\0';
+            //}
+
             if (!GetProcessImageFileNameW(h, one.imagename, MAX_PATH)) {
                 one.imagename[0] = '\0';
             }

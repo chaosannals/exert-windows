@@ -23,6 +23,7 @@
     <ClCompile Include="src\ps.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\disc.h" />
     <ClInclude Include="src\process.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

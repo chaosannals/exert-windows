@@ -17,5 +17,8 @@
     <ClInclude Include="src\process.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\disc.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
