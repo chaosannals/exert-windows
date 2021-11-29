@@ -1,4 +1,4 @@
-#include <iostream>
+ï»¿#include <iostream>
 #include <fstream>
 #include<filesystem>
 #include<Windows.h>
@@ -18,24 +18,24 @@ int make_newpe(const std::string path) {
 		IMAGE_DOS_HEADER* dosh = reinterpret_cast<IMAGE_DOS_HEADER*>(buffer.get());
 		std::cout << "dos magic:" << std::hex << dosh->e_magic << std::endl;
 		if (dosh->e_magic != IMAGE_DOS_SIGNATURE) {
-			std::cout << "²»ÊÇÓÐÐ§µÄ DOS Í·" << std::endl;
+			std::cout << "ä¸æ˜¯æœ‰æ•ˆçš„ DOS å¤´" << std::endl;
 			return -1;
 		}
-		// ÓÐ 64Î» ºÍ 32Î»µÄÍ·²¿Çø·Ö£¬ÕâÀïÀàÐÍ¶¨ÒåÓÉºê¿ØÖÆÁË¡£
+		// æœ‰ 64ä½ å’Œ 32ä½çš„å¤´éƒ¨åŒºåˆ†ï¼Œè¿™é‡Œç±»åž‹å®šä¹‰ç”±å®æŽ§åˆ¶äº†ã€‚
 		IMAGE_NT_HEADERS* nth = reinterpret_cast<IMAGE_NT_HEADERS*>(buffer.get() + dosh->e_lfanew);
 		std::cout << "pe signature: " << nth->Signature << std::endl;
 		if (nth->Signature != IMAGE_NT_SIGNATURE) {
-			std::cout << "²»ÊÇÓÐÐ§µÄ PE Í·" << std::endl;
+			std::cout << "ä¸æ˜¯æœ‰æ•ˆçš„ PE å¤´" << std::endl;
 			return -2;
 		}
 
-		// ÊäÈë±í
+		// è¾“å…¥è¡¨
 		DWORD iida = nth->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress;
 		DWORD iids = nth->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].Size;
 		DWORD iide = iida + iids;
 		std::cout << "iid: " << iida << " : " << iids << std::endl;
 
-		// ¿éÐÅÏ¢
+		// å—ä¿¡æ¯
 		IMAGE_SECTION_HEADER* iidsh = nullptr;
 		std::map<int, DWORD> sections;
 		IMAGE_SECTION_HEADER* sh = reinterpret_cast<IMAGE_SECTION_HEADER*>(buffer.get() + dosh->e_lfanew + sizeof(IMAGE_NT_HEADERS));
@@ -54,7 +54,7 @@ int make_newpe(const std::string path) {
 			++sh;
 		}
 		if (iidsh != nullptr) {
-			// µ¼Èë±íÐÅÏ¢¡£
+			// å¯¼å…¥è¡¨ä¿¡æ¯ã€‚
 			DWORD iido = iidsh->PointerToRawData + (iida - iidsh->VirtualAddress);
 			std::cout << "iido: " << iido << std::endl;
 			IMAGE_IMPORT_DESCRIPTOR* iidp = reinterpret_cast<IMAGE_IMPORT_DESCRIPTOR*>(buffer.get() + iido);
