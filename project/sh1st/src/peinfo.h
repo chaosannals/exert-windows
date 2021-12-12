@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <Windows.h>
 
@@ -29,19 +29,19 @@ int iid_count(IMAGE_IMPORT_DESCRIPTOR* p) {
 
 void restore_iid(NEW_IID* np, IMAGE_IMPORT_DESCRIPTOR* op) {
 	while (op->Name != NULL) {
-		// ´æµ½ĞÂµØ·½
+		// å­˜åˆ°æ–°åœ°æ–¹
 		np->FirstThunk = op->FirstThunk;
 		np->Name = op->Name;
 		np->OriginalFirstThunk = op->OriginalFirstThunk;
 
-		// ²Á³ı
+		// æ“¦é™¤
 		op->FirstThunk = 0;
 		op->OriginalFirstThunk = 0;
 		op->Name = 0;
 		op->ForwarderChain = 0;
 		op->TimeDateStamp = 0;
 
-		// Ö¸ÏòÏÂÒ»¸ö
+		// æŒ‡å‘ä¸‹ä¸€ä¸ª
 		++np;
 		++op;
 	}

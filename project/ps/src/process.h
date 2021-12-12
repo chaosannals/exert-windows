@@ -5,6 +5,7 @@
 #include<vector>
 #include<memory>
 #include<exert/base.h>
+#include"disc.h"
 
 namespace ext {
 
@@ -12,9 +13,12 @@ namespace ext {
 		DWORD id;
         WCHAR filename[MAX_PATH];
         WCHAR imagename[MAX_PATH];
+        WCHAR path[MAX_PATH];
 	};
 
 	std::vector<process_t> list_processes() {
+        std::vector<logic_drive_t> dsv = list_disc();
+
         std::vector<process_t> result;
         handle_t sh = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
         
@@ -30,8 +34,12 @@ namespace ext {
             one.id = entry.th32ProcessID;
             std::copy(entry.szExeFile, entry.szExeFile + MAX_PATH, one.filename);
             handle_t h = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, one.id);
+
             if (!GetProcessImageFileNameW(h, one.imagename, MAX_PATH)) {
                 one.imagename[0] = '\0';
+            }
+            else {
+                fill_path(dsv, one.imagename, one.path);
             }
             result.push_back(one);
             able = Process32NextW(sh, &entry);
