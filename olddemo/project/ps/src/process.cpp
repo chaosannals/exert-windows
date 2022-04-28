@@ -14,7 +14,7 @@ void bypsapi() {
             if (h == nullptr) {
                 std::cout << "IHV: " << GetLastError() << std::endl;
             }
-            if (GetProcessImageFileName(h, filename, MAX_PATH)) {
+            if (GetProcessImageFileNameW(h, filename, MAX_PATH)) {
                 std::wcout << filename << std::endl;
             }
             else {

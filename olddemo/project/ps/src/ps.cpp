@@ -11,7 +11,7 @@ int main()
     }
     std::wcout << dlist.size() << std::endl;
     */
-
+    /*
     auto list = ext::list_processes();
     std::wcout << "psc: " << list.size() << std::endl;
     for (auto &a : list) {
@@ -19,11 +19,13 @@ int main()
         std::wcout << a.imagename << std::endl;
         std::wcout << a.path << std::endl;
     }
-    
-    /*
-    auto dt = exert::find_process_by_name(L"DingTalk.exe");
-    std::wcout << dt->filename << std::endl;
     */
+    
+    
+    auto dt = ext::find_process_by_name(L"DingTalk.exe");
+    std::cout << dt->id << std::endl;
+    std::wcout << dt->filename << std::endl;
+    
     return 0;
 }
 

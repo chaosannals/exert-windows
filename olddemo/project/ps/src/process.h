@@ -11,6 +11,7 @@ namespace ext {
 
 	struct process_t {
 		DWORD id;
+        DWORD pid;
         WCHAR filename[MAX_PATH];
         WCHAR imagename[MAX_PATH];
         WCHAR path[MAX_PATH];
@@ -32,6 +33,7 @@ namespace ext {
         while (able) {
             process_t one;
             one.id = entry.th32ProcessID;
+            one.pid = entry.th32ParentProcessID;
             std::copy(entry.szExeFile, entry.szExeFile + MAX_PATH, one.filename);
             handle_t h = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, one.id);
 
