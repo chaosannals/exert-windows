@@ -32,4 +32,8 @@
   <ItemGroup>
     <Font Include="SourceHanSerifCN-Light.ttf" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="inject.h" />
+    <ClInclude Include="man.h" />
+  </ItemGroup>
 </Project>
