@@ -156,6 +156,7 @@
     <Font Include="SourceHanSerifCN-Light.ttf" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ijshare.h" />
     <ClInclude Include="inject.h" />
     <ClInclude Include="man.h" />
   </ItemGroup>

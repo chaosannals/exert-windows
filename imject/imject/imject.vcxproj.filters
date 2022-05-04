@@ -35,5 +35,6 @@
   <ItemGroup>
     <ClInclude Include="inject.h" />
     <ClInclude Include="man.h" />
+    <ClInclude Include="ijshare.h" />
   </ItemGroup>
 </Project>

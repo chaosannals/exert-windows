@@ -1,5 +1,7 @@
 #pragma once
 #include <Windows.h>
+#include <string>
+#include "ijshare.h"
 #include "imgui.h"
 
 namespace InjectGui {
@@ -74,6 +76,7 @@ namespace InjectGui {
 
                 // 获取自身进程中 LoadLibraryA 的内存地址.  (非文档化, 只是恰好 kernel32 总是被优先加载, 内存地址在每个进程中是一样的, 每次重启系统后会变 )
 
+
                 auto LoadLibraryPtr = (LPVOID)GetProcAddress(GetModuleHandleA("kernel32.dll"), "LoadLibraryA");
                 auto h = CreateRemoteThread(p, NULL, NULL, (LPTHREAD_START_ROUTINE)LoadLibraryPtr, (LPVOID)vp, NULL, NULL);
                 WaitForSingleObject(h, INFINITE);
@@ -96,6 +99,37 @@ namespace InjectGui {
             }
         }
 
+        void UnjectTo() {
+            auto d = ijshare_open("ijdll");
+            step = 0;
+            err = 0;
+            HANDLE p = nullptr;
+            __try {
+                if (d) {
+                    p = OpenProcess(P_P, false, pid);
+                    if (p == nullptr) {
+                        step = 1;
+                        __leave;
+                    }
+                    auto FreeLibraryPtr = (LPVOID)GetProcAddress(GetModuleHandleA("kernel32.dll"), "FreeLibrary");
+                    auto h = CreateRemoteThread(p, NULL, NULL, (LPTHREAD_START_ROUTINE)FreeLibraryPtr, (LPVOID)d->ijdll, NULL, NULL);
+                    WaitForSingleObject(h, INFINITE);
+                    DWORD threadExitCode;
+                    GetExitCodeThread(h, &threadExitCode);
+                }
+            }
+            __finally {
+                if (step != 0) {
+                    err = GetLastError();
+                }
+                if (p != nullptr) {
+                    CloseHandle(p);
+                }
+                if (d != nullptr) {
+                    delete d;
+                }
+            }
+        }
     public:
         void Render() {
             ImGui::Begin(u8"目标进程");
@@ -108,6 +142,9 @@ namespace InjectGui {
 
             if (ImGui::Button(u8"注入")) {
                 InjectTo();
+            }
+            if (ImGui::Button(u8"释放")) {
+                UnjectTo();
             }
             ImGui::End();
         }
