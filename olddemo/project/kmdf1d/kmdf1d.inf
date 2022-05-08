@@ -1,0 +1,77 @@
+;
+; kmdf1d.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=System ; TODO: specify appropriate Class
+ClassGuid={4d36e97d-e325-11ce-bfc1-08002be10318} ; TODO: specify appropriate ClassGuid
+Provider=%ManufacturerName%
+CatalogFile=kmdf1d.cat
+DriverVer= ; TODO: set DriverVer in stampinf property pages
+PnpLockdown=1
+
+[DestinationDirs]
+DefaultDestDir = 12
+kmdf1d_Device_CoInstaller_CopyFiles = 11
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+kmdf1d.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%kmdf1d.DeviceDesc%=kmdf1d_Device, Root\kmdf1d ; TODO: edit hw-id
+
+[kmdf1d_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+kmdf1d.sys
+
+;-------------- Service installation
+[kmdf1d_Device.NT.Services]
+AddService = kmdf1d,%SPSVCINST_ASSOCSERVICE%, kmdf1d_Service_Inst
+
+; -------------- kmdf1d driver install sections
+[kmdf1d_Service_Inst]
+DisplayName    = %kmdf1d.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\kmdf1d.sys
+
+;
+;--- kmdf1d_Device Coinstaller installation ------
+;
+
+[kmdf1d_Device.NT.CoInstallers]
+AddReg=kmdf1d_Device_CoInstaller_AddReg
+CopyFiles=kmdf1d_Device_CoInstaller_CopyFiles
+
+[kmdf1d_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[kmdf1d_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[kmdf1d_Device.NT.Wdf]
+KmdfService =  kmdf1d, kmdf1d_wdfsect
+[kmdf1d_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+DiskName = "kmdf1d Installation Disk"
+kmdf1d.DeviceDesc = "kmdf1d Device"
+kmdf1d.SVCDESC = "kmdf1d Service"
