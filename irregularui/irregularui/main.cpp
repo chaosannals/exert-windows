@@ -11,7 +11,7 @@ int WINAPI WinMain(
 ) {
 	system_tray_t tray(TEXT("tray"));
 	irregular_window_t window(TEXT("skin.bmp"), TEXT("mask.bmp"));
-
+	tray.listen_visible_toggle([&window]() { window.toggle_visiable(); });
 	tray.create(hInstance);
 	window.create(hInstance, TEXT("不规则窗口"));
 

@@ -16,4 +16,5 @@ public:
 	void remove();
 	HRGN calculate_range();
 	static LRESULT CALLBACK process_message(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+	void toggle_visiable();
 };

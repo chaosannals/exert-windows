@@ -183,3 +183,7 @@ HRGN irregular_window_t::calculate_range() {
 	DeleteDC(hdc);
 	return full_region;
 }
+
+void irregular_window_t::toggle_visiable() {
+	ShowWindow(state->window_handle, !IsWindowVisible(state->window_handle));
+}

@@ -2,6 +2,8 @@
 #include <map>
 
 const int MID_EXIT = 11;
+const int MID_SHOW = 12;
+
 TCHAR system_tray_window_class_name[] = TEXT("system_tray_window_class_name");
 static BOOL is_register_system_tray_window_class = FALSE;
 static std::map<HWND, system_tray_t*> allin;
@@ -11,10 +13,14 @@ struct system_tray_state_t {
 	NOTIFYICONDATA icon;
 	HMENU menu;
 	HWND window_handle;
+	std::function<void()> on_toggle_visible;
 	system_tray_state_t():
 		menu(nullptr),
 		window_handle(nullptr)
-	{}
+	{
+		ZeroMemory(&title, sizeof(title));
+		ZeroMemory(&icon, sizeof(icon));
+	}
 };
 
 LRESULT CALLBACK system_tray_t::process_message(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -38,6 +44,8 @@ LRESULT CALLBACK system_tray_t::process_message(HWND hwnd, UINT message, WPARAM 
 			icon.dwInfoFlags = NIIF_INFO;
 			Shell_NotifyIcon(NIM_ADD, &icon);
 			stp->state->menu = CreatePopupMenu();
+			AppendMenu(stp->state->menu, MF_STRING, MID_SHOW, TEXT("ÏÔÊ¾"));
+			AppendMenu(stp->state->menu, MF_SEPARATOR, 0, TEXT(""));
 			AppendMenu(stp->state->menu, MF_STRING, MID_EXIT, TEXT("¹Ø±Õ"));
 		}
 		break;
@@ -57,6 +65,11 @@ LRESULT CALLBACK system_tray_t::process_message(HWND hwnd, UINT message, WPARAM 
 				);
 				if (mid == MID_EXIT) {
 					SendMessage(hwnd, WM_CLOSE, wParam, lParam);
+				}
+				else if(mid == MID_SHOW) {
+					if (st->second->state->on_toggle_visible) {
+						st->second->state->on_toggle_visible();
+					}
 				}
 			}
 		}
@@ -141,4 +154,8 @@ void system_tray_t::remove() {
 		delete state;
 		state = nullptr;
 	}
+}
+
+void system_tray_t::listen_visible_toggle(const std::function<void()>& f) {
+	state->on_toggle_visible = f;
 }
