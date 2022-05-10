@@ -2,5 +2,13 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="input_text.cpp" />
+    <ClCompile Include="irregular_window.cpp" />
+    <ClCompile Include="system_tray.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="input_text.h" />
+    <ClInclude Include="irregular_window.h" />
+    <ClInclude Include="system_tray.h" />
   </ItemGroup>
 </Project>
