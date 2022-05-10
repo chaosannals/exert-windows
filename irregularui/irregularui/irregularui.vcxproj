@@ -139,7 +139,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="input_text.cpp" />
+    <ClCompile Include="irregular_window.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="system_tray.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="input_text.h" />
+    <ClInclude Include="irregular_window.h" />
+    <ClInclude Include="system_tray.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
