@@ -153,6 +153,7 @@
     <ClCompile Include="ijshare.cpp" />
     <ClCompile Include="imgui_window.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="rinject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="SourceHanSerifCN-Light.ttf" />
@@ -162,6 +163,7 @@
     <ClInclude Include="imgui_window.h" />
     <ClInclude Include="inject.h" />
     <ClInclude Include="man.h" />
+    <ClInclude Include="rinject.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

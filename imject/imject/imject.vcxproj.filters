@@ -30,6 +30,7 @@
     </ClCompile>
     <ClCompile Include="imgui_window.cpp" />
     <ClCompile Include="ijshare.cpp" />
+    <ClCompile Include="rinject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="SourceHanSerifCN-Light.ttf" />
@@ -39,5 +40,6 @@
     <ClInclude Include="man.h" />
     <ClInclude Include="ijshare.h" />
     <ClInclude Include="imgui_window.h" />
+    <ClInclude Include="rinject.h" />
   </ItemGroup>
 </Project>
