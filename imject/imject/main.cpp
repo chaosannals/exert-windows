@@ -23,15 +23,23 @@ int main(int, char**)
     while (!done)
     {
         MSG msg;
+        int mc = 0;
         while (::PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
         {
             ::TranslateMessage(&msg);
             ::DispatchMessage(&msg);
+            ++mc;
             if (msg.message == WM_QUIT)
                 done = true;
         }
         if (done)
             break;
+        if (mc == 0) {
+            Sleep(1);
+            // imgui 最小化会占满 CPU
+            // Sleep(0); // 无效
+            // YieldProcessor(); // 无效 
+        }
 
         window.render();
     }
