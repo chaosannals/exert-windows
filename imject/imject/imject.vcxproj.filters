@@ -28,6 +28,8 @@
     <ClCompile Include="..\imgui\imgui_widgets.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
+    <ClCompile Include="imgui_window.cpp" />
+    <ClCompile Include="ijshare.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="SourceHanSerifCN-Light.ttf" />
@@ -36,5 +38,6 @@
     <ClInclude Include="inject.h" />
     <ClInclude Include="man.h" />
     <ClInclude Include="ijshare.h" />
+    <ClInclude Include="imgui_window.h" />
   </ItemGroup>
 </Project>
