@@ -35,7 +35,7 @@ int main(int, char**)
         if (done)
             break;
         if (mc == 0) {
-            Sleep(1);
+            // Sleep(1);
             // imgui 最小化会占满 CPU
             // Sleep(0); // 无效
             // YieldProcessor(); // 无效 

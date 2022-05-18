@@ -89,18 +89,26 @@ bool CManualMapInject::InjectorDLL(TCHAR* szPath, DWORD dwPid)
     file.Read(pSrcData, nFileSize);
     file.Close();*/
 
-    std::ifstream f(szPath);
-    f.open(szPath, std::ios::in);
-    BYTE* pSrcData = nullptr;
-    int nFileSize = 0;
-    if (f.is_open()) {
-        f.seekg(0, std::ios::end);    // go to the end  
-        auto length = f.tellg();
-        f.seekg(0, std::ios::beg);
-        pSrcData = new BYTE[length];    // allocate memory for a buffer of appropriate dimension  
-        f.read((char*)pSrcData, length);       // read the whole file into the buffer  
-        f.close();
+    HANDLE hf = CreateFile(
+        szPath,
+        GENERIC_READ,
+        FILE_SHARE_READ,
+        NULL,
+        OPEN_EXISTING,
+        FILE_ATTRIBUTE_NORMAL,
+        NULL
+    );
+
+    if (hf == INVALID_HANDLE_VALUE) {
+        return false;
     }
+    DWORD nFileSize = GetFileSize(hf, NULL);
+    BYTE* pSrcData = new BYTE[nFileSize];
+    DWORD rdcount;
+    if (!ReadFile(hf, pSrcData, nFileSize, &rdcount, NULL)) {
+        return false;
+    }
+    CloseHandle(hf);
 
     if (!ManualMapDll(hProc, pSrcData, nFileSize))
     {
@@ -212,6 +220,11 @@ bool ManualMapDll(HANDLE hProc, BYTE* pSrcData, SIZE_T FileSize, bool ClearHeade
         return false;
     }
 
+    OutputDebugStringA("=================");
+    char msg[1000];
+    sprintf_s(msg, 1000, "%llx", pShellcode);
+    OutputDebugStringA(msg);
+    MessageBoxA(NULL, msg, "", MB_OK);
 
     HANDLE hThread = CreateRemoteThread(hProc, nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(pShellcode), MappingDataAlloc, 0, nullptr);
     if (!hThread)
@@ -320,8 +333,8 @@ bool ManualMapDll(HANDLE hProc, BYTE* pSrcData, SIZE_T FileSize, bool ClearHeade
 
 
 
-//#pragma runtime_checks( "", off )
-//#pragma optimize( "", off )
+#pragma runtime_checks( "", off )
+#pragma optimize( "", off )
 void __stdcall Shellcode(MANUAL_MAPPING_DATA* pData)
 {
     if (!pData)
