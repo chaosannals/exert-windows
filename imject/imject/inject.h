@@ -3,6 +3,7 @@
 #include <string>
 #include "ijshare.h"
 #include "imgui.h"
+#include "rinject.h"
 
 namespace InjectGui {
 
@@ -19,6 +20,9 @@ namespace InjectGui {
         int pid = 0;
         DWORD err = 0;
         int step = 0;
+        DWORD64 scp = 0;
+        DWORD64 scp2 = 0;
+        DWORD64 scp3 = 0;
 
         void InjectTo() {
             err = 0;
@@ -130,6 +134,56 @@ namespace InjectGui {
                 }
             }
         }
+
+        void RInjectTo() {
+#if _DEBUG
+            TCHAR tail[] = TEXT("\\..\\x64\\Debug\\rijdll.dll");
+#else
+            TCHAR tail[] = TEXT("\\..\\x64\\Release\\rijdll.dll");
+#endif // _DEBUG
+
+            int s = GetCurrentDirectory(0, nullptr) + 1 + lstrlen(tail);
+            auto buf = (LPTSTR)malloc(s);
+            int s1 = GetCurrentDirectory(s, buf);
+            lstrcpy(buf + s1, tail);
+            CManualMapInject ri;
+            ri.InjectorDLL(buf, pid);
+        }
+
+        void ROutShellCode() {
+            void* p = *reinterpret_cast<void**>(&Shellcode);
+            scp = (DWORD64) *Shellcode;
+            scp2 = (DWORD64) &Shellcode;
+            //scp3 = (DWORD64)*reinterpret_cast<void**>(&Shellcode);
+            scp3 = *reinterpret_cast<char*>(Shellcode);
+
+            FILE* f = NULL;
+            fopen_s(&f, "sss.bin", "wb");
+            if (f) {
+                fwrite(p, 0x1000, 1, f);
+                fclose(f);
+            }
+
+            HANDLE schf = CreateFile(
+                TEXT("shellcode.bin"),
+                GENERIC_WRITE,
+                FILE_SHARE_READ,
+                NULL,
+                OPEN_ALWAYS,
+                FILE_ATTRIBUTE_NORMAL,
+                NULL
+            );
+
+            if (schf == INVALID_HANDLE_VALUE) {
+                return;
+            }
+            DWORD scwcount = 0;
+            if (WriteFile(schf, p, 0x1000, &scwcount, NULL)) {
+                return;
+            }
+            FlushFileBuffers(schf);
+            CloseHandle(schf);
+        }
     public:
         void Render() {
             ImGui::Begin(u8"目标进程");
@@ -137,6 +191,7 @@ namespace InjectGui {
             ImGui::Text(u8"错误码：%d", err);
             ImGui::Text(u8"步骤：%d", step);
             ImGui::InputInt("pid", &pid);
+            ImGui::Text(u8"Shell Code: %lld %lld %lld", scp, scp2, scp3);
 
             ImGui::SameLine();
 
@@ -145,6 +200,12 @@ namespace InjectGui {
             }
             if (ImGui::Button(u8"释放")) {
                 UnjectTo();
+            }
+            if (ImGui::Button(u8"反射注入")) {
+                RInjectTo();
+            }
+            if (ImGui::Button(u8"打出ShellCode")) {
+                ROutShellCode();
             }
             ImGui::End();
         }
