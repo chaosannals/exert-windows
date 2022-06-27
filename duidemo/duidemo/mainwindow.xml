@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<Window size="400,300">
+	<VerticalLayout bkcolor="0xFFA6CAF0">
+		<Button height="2" hotbkcolor="0xFFFF0000" pushedbkcolor="0xFFFF0000" disabledbkcolor="0xFFFF0000" text="测试" pos="0,0,0,2" borderround="100,100" />
+		<Combo width="400" height="24" pos="0,0,400,24" />
+		<IPAddress />
+		<Label text="AAA" height="-1" pos="0,0,0,-1" />
+	</VerticalLayout>
+</Window>
