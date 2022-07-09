@@ -1,9 +1,16 @@
 <?xml version="1.0"?>
 <Window size="400,300">
 	<VerticalLayout bkcolor="0xFFA6CAF0">
-		<Button height="2" hotbkcolor="0xFFFF0000" pushedbkcolor="0xFFFF0000" disabledbkcolor="0xFFFF0000" text="测试" pos="0,0,0,2" borderround="100,100" />
+		<HorizontalLayout height="20" pos="0,0,0,20">
+			<Label text="AAA" width="60" height="-1" autocalcwidth="true" pos="0,0,60,-1" />
+			<IPAddress />
+		</HorizontalLayout>
 		<Combo width="400" height="24" pos="0,0,400,24" />
-		<IPAddress />
-		<Label text="AAA" height="-1" pos="0,0,0,-1" />
+		<GridCtrl rowcount="10" columncount="10" />
+		<HorizontalLayout height="20" pos="0,0,0,20">
+			<DateTime width="400" height="16" pos="0,0,400,16" />
+			<Edit />
+			<Button height="20" hotbkcolor="0xFFFF0000" pushedbkcolor="0xFFFF0000" disabledbkcolor="0xFFFF0000" text="测试" pos="0,0,0,20" borderround="100,100" />
+		</HorizontalLayout>
 	</VerticalLayout>
 </Window>
