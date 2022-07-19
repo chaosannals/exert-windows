@@ -1,0 +1,12 @@
+add_executable(demoserver)
+
+target_link_libraries(
+    demoserver
+    ws2_32.lib
+)
+
+target_sources(
+    demoserver
+    PRIVATE
+    "server.cpp"
+)

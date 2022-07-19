@@ -1,0 +1,12 @@
+add_executable(democlient)
+
+target_link_libraries(
+    democlient
+    ws2_32.lib
+)
+
+target_sources(
+    democlient
+    PRIVATE
+    "client.cpp"
+)

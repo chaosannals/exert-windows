@@ -1,0 +1,12 @@
+add_executable(demobare)
+
+target_link_libraries(
+    demobare
+    ws2_32.lib
+)
+
+target_sources(
+    demobare
+    PRIVATE
+    "main.cpp"
+)
