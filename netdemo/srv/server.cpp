@@ -1,4 +1,4 @@
-#include <winsock2.h>
+ï»¿#include <winsock2.h>
 #include <windows.h>
 #include <string>
 #include <iostream>
@@ -9,7 +9,7 @@ HANDLE g_hIOCP;
 enum IO_OPERATION { IO_READ, IO_WRITE };
 
 struct IO_DATA {
-    OVERLAPPED                  Overlapped; /* ÒòÎªÊÇµÚÒ»¸ö×Ö¶Î£¬ËùÒÔÈ¡ Overlapped Ö¸ÕëÆäÊµÒ²ÊÇ IO_DATA µÄµØÖ·¡£*/
+    OVERLAPPED                  Overlapped; /* å› ä¸ºæ˜¯ç¬¬ä¸€ä¸ªå­—æ®µï¼Œæ‰€ä»¥å– Overlapped æŒ‡é’ˆå…¶å®ä¹Ÿæ˜¯ IO_DATA çš„åœ°å€ã€‚*/
     WSABUF                      wsabuf;
     int                         nBytes;
     IO_OPERATION                opCode;

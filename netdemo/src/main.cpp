@@ -1,4 +1,4 @@
-#include <WinSock2.h>
+﻿#include <WinSock2.h>
 #include <Windows.h>
 #include <iostream>
 
@@ -14,7 +14,7 @@ struct PER_HANDLE_DATA
 };
 
 struct PER_IO_DATA {
-	OVERLAPPED ol; // ��Ϊ�ǵ�һ���ֶΣ�����ȡ ol ָ����ʵҲ�� PER_IO_DATA �ĵ�ַ��
+	OVERLAPPED ol; // 因为是第一个字段，所以取 ol 指针其实也是 PER_IO_DATA 的地址。
 	char buf[BUFFER_SIZE];
 	int optype;
 };
