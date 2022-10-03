@@ -36,4 +36,30 @@ int main() {
 		StringCchPrintfW(output, 1024, L"pid: %d ; sid: unknown", processId);
 	}
 	OutputDebugStringW(output);
+
+
+	//
+	HANDLE fmap = CreateFileMappingW(
+		INVALID_HANDLE_VALUE,
+		NULL,
+		PAGE_READWRITE,
+		0, 10240,
+		NULL
+	);
+	HANDLE fmapro;
+	DuplicateHandle(
+		GetCurrentProcess(),
+		fmap,
+		GetCurrentProcess(),
+		&fmapro,
+		FILE_MAP_READ,
+		FALSE,
+		0
+	);
+
+	// fmapro 只读。
+
+	CloseHandle(fmapro);
+
+	CloseHandle(fmap);
 }
