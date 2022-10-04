@@ -18,3 +18,4 @@ endif()
 
 add_subdirectory(stringdemo)
 add_subdirectory(kobjdemo)
+add_subdirectory(procdemo)
