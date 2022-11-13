@@ -19,8 +19,37 @@ bu calc!wWinMain
 @rem 列举断点
 bl
 
-@rem 运行 会到达断点或者事件触发而停止
+@rem 运行 （F5） 会到达断点或者事件触发而停止
 g
+
+@rem 执行当前函数直到结束（Shift+F11） go up
+gu
+
+@rem 单步进入（F11）
+t
+@rem 单步进入直到地址
+ta 0x00781759
+@rem 单步进入直到遇到 call
+tc
+@rem 单步进入直到遇到分支跳转
+th
+@rem 单步进入直到遇到 ret 命令
+tt
+@rem 单步进入直到遇到 call 或 ret 命令
+tct
+
+@rem 单步跳过（F10）
+p
+@rem 单步跳过直到地址
+pa 0x00781759
+@rem 单步跳过直到遇到 call
+pc
+@rem 单步跳过直到遇到分支跳转
+ph
+@rem 单步跳过直到遇到 ret 命令
+pt
+@rem 单步跳过直到遇到 call 或 ret 命令
+pct
 
 @rem 查看堆栈跟踪
 k

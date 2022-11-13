@@ -1,5 +1,7 @@
 # cdb
 
+dbgeng 命令行的调试器（用户模式），执行在原有窗口。
+
 一般 cdb 在:
 
 - C:\Program Files (x86)\Windows Kits\10\Debuggers\x64
