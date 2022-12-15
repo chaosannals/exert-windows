@@ -29,3 +29,16 @@
   ]
 }
 ```
+
+
+## mklink
+
+注：PowerShell 没有该命令，要 CMD 命令行下才有
+
+```bat
+@rem 迁移 .nuget 目录到D盘
+@rem /D 目录 符号链接
+@rem /H 硬链接 只能是文件
+@rem /J 目录联接（Junction Point）
+mklink /D C:\Users\yourname\.nuget D:\.nuget
+```
