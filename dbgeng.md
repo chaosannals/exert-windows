@@ -84,5 +84,16 @@ n 10
 .expr /s masm
 ```
 
+
+```bat
+@rem gdtl 和 ldtl 需要读2次才能读完整
+r gdtr
+r gdtr
+r ldtl
+r ldtl
+
+@rem 通过输入段寄存器的值来查看段信息
+dg 1b
+```
 ## 脚本与自动化
 
