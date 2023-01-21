@@ -1,0 +1,15 @@
+struct point {
+	i32 x;
+	i32 y;
+}
+
+i32 main() {
+	point p;
+	p.x = 1024;
+	p.y = 768;
+	print("p:\t{}\n", p);
+	for(i32 i = 0; i < 10; i++) {
+		print("i: {}\n", i);
+	}
+	return 0;
+}
