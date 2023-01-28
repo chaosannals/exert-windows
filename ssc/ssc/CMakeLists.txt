@@ -6,7 +6,7 @@ target_sources(
 	ssc
 	PRIVATE
 	src/main.cpp
- "src/lexeme.h" "src/error.h" "src/lexer.cpp")
+ "src/lexeme.h" "src/error.h" "src/lexer.cpp" "src/x86asm.h" "src/coff.h" "src/parser.h")
 
 file(
 	COPY
