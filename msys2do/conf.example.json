@@ -1,0 +1,16 @@
+{
+    "msys2": {
+        "dir": "D:\\Msys2",
+        "bin_dir": "D:\\Msys2\\mingw64\\bin"
+    },
+    "do": [
+        {
+            "command": "",
+            "valid": ""
+        },
+        {
+            "command": "",
+            "valid": ""
+        }
+    ]
+}
