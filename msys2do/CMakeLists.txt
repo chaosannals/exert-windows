@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+ï»¿cmake_minimum_required(VERSION 3.20)
 
 option(VS_LINK_STATIC_MT "static link mt." ON)
 
@@ -19,13 +19,13 @@ FetchContent_Declare(
   GIT_TAG        bb3e8d18a33e8335619519e62462c666370e232d # 
 )
 
-FetchContent_GetProperties(jsonc) # »ñÈ¡ÊôĞÔ
+FetchContent_GetProperties(jsonc) # è·å–å±æ€§
 if (NOT jsonc_POPULATED)
     message(STATUS "not jsonc populated.")
     FetchContent_Populate(jsonc)
     message(STATUS "jsonc src: ${jsonc_SOURCE_DIR}")
     message(STATUS "jsonc bin: ${jsonc_BINARY_DIR}")
-    # Õâ¸ö¿âÖ»ÓÃµ½Ô´Âë£¬ËùÒÔÖ»ÔÚÕâÀïÒıÈëÔ´Âë
+    # è¿™ä¸ªåº“åªç”¨åˆ°æºç ï¼Œæ‰€ä»¥åªåœ¨è¿™é‡Œå¼•å…¥æºç 
     target_include_directories(
         msys2do
         PUBLIC
@@ -45,19 +45,21 @@ if (NOT jsonc_POPULATED)
         add_custom_command(
             OUTPUT "${MSYS2DO_OUTPUT_DIR}/conf.json"
             COMMAND copy /y ${MSYS2DO_CONF_PATH} "${MSYS2DO_OUTPUT_DIR}/conf.json"
+            COMMENT "copy conf.json"
         )
     else()
         message(STATUS "conf.json is not found, copy conf.example.json")
         add_custom_command(
             OUTPUT "${MSYS2DO_OUTPUT_DIR}/conf.json"
             COMMAND copy /y ${MSYS2DO_CONF_EXAMPLE_PATH} "${MSYS2DO_OUTPUT_DIR}/conf.json"
+            COMMENT "copy conf.example.json"
         )
     endif()
     #file(COPY ${MSYS2DO_CONF_PATH} DESTINATION ${MSYS2DO_OUTPUT_DIR})
     
 else()
     message(STATUS "has jsonc populated.")
-    # ÆğĞ§£¬jsonc Õâ¸ö²»ÊÇ cmake ÏîÄ¿£¬Õâ¾äÎŞĞ§
+    # èµ·æ•ˆï¼Œjsonc è¿™ä¸ªä¸æ˜¯ cmake é¡¹ç›®ï¼Œè¿™å¥æ— æ•ˆ
     FetchContent_MakeAvailable(jsonc)
 endif()
 
