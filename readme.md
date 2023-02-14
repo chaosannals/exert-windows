@@ -42,3 +42,10 @@
 @rem /J 目录联接（Junction Point）
 mklink /D C:\Users\yourname\.nuget D:\.nuget
 ```
+
+## ipconfig
+
+```bat
+@rem 刷新 DNS 缓存
+ipconfig /flushdns
+```

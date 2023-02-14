@@ -19,10 +19,15 @@ FetchContent_Declare(
   GIT_TAG        bb3e8d18a33e8335619519e62462c666370e232d # 
 )
 
+# 必须是有效 cmake 项目使用
+# FetchContent_MakeAvailable(jsonc)
+
 FetchContent_GetProperties(jsonc) # 获取属性
 if (NOT jsonc_POPULATED)
     message(STATUS "not jsonc populated.")
-    FetchContent_Populate(jsonc)
+
+    FetchContent_Populate(jsonc) #没有属性说明没有拉取，这个会拉取
+    
     message(STATUS "jsonc src: ${jsonc_SOURCE_DIR}")
     message(STATUS "jsonc bin: ${jsonc_BINARY_DIR}")
     # 这个库只用到源码，所以只在这里引入源码
@@ -59,8 +64,6 @@ if (NOT jsonc_POPULATED)
     
 else()
     message(STATUS "has jsonc populated.")
-    # 起效，jsonc 这个不是 cmake 项目，这句无效
-    FetchContent_MakeAvailable(jsonc)
 endif()
 
 set_target_properties(
