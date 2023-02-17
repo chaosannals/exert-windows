@@ -94,6 +94,19 @@ r ldtl
 
 @rem 通过输入段寄存器的值来查看段信息
 dg 1b
+
+@rem 查看 PEB
+!peb
+@rem 显示PEB字段详细
+dt ntdll!_PEB
+
+@rem 查看 TEB
+!teb
+@rem 显示TEB字段详细
+dt ntdll!_TEB
+
+@rem Display Type 显示类型
+dt -h
 ```
 ## 脚本与自动化
 
