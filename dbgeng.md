@@ -107,6 +107,11 @@ dt ntdll!_TEB
 
 @rem Display Type 显示类型
 dt -h
+
+@rem 动态库名!结构体名
+@rem 内核 MSDN 很多都不给文档，字段名都是保留（Reserved1、Reserved2 之类）。
+@rem 用 dt 却可以查看字段名，大概猜作用。
+dt ntdll!_PEB_LDR_DATA
 ```
 ## 脚本与自动化
 
