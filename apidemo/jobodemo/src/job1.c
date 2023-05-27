@@ -7,6 +7,7 @@ int main() {
 	SIZE_T size = 10;
 	PVOID p = NULL;
 
+	Sleep(1444);
 	while (1) {
 		PVOID pnow = VirtualAlloc(
 			NULL,
@@ -20,9 +21,12 @@ int main() {
 				size *= 10;
 			}
 			p = pnow;
+			for (SIZE_T i = 0; i < size; ++i) {
+				*(char*)p = 1;
+			}
 		}
 		StringCchPrintf(output, 1024, L"pointer: %llx size: %llu \r\n", (SIZE_T)p, size);
 		OutputDebugString(output);
-		Sleep(44);
+		Sleep(4);
 	}
 }

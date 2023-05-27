@@ -44,7 +44,7 @@ int main() {
 		goto defer;
 	}
 
-	WaitForSingleObject(processInfo.hProcess, 10000);
+	WaitForSingleObject(processInfo.hProcess, 40000);
 
 	goto end;
 
