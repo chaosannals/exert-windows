@@ -1,5 +1,9 @@
 # exert windows
 
+## VS 注意项
+
+1. OutputDebugString 在 VS 调试时会被截获，不会在 DebugView 看到。从 VS2010 开始有个 BUG ，就是如果 OutputDebugString 输出的字符串不换行 "\n" 就不会被输出到 VS 的调试输出窗口。
+
 ## VS 远程调试 Vbox
 
 1. Vbox 把网卡改成桥接，然后固定共享 VS的远程调试工具目录（例如：C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Remote Debugger）
