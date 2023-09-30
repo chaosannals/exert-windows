@@ -23,11 +23,12 @@ namespace ssc {
 		{
 		}
 
+        lexeme pop_lexeme();
+    private:
 		void next_char();
 		void skip_char();
 		lexeme new_lexeme(ssc::token token, const std::string& text);
 
-		lexeme pop_lexeme();
 		lexeme pop_punct();
 		lexeme pop_number();
 		lexeme pop_string();

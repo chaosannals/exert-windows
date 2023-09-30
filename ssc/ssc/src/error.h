@@ -4,6 +4,9 @@
 #include <format>
 
 namespace ssc {
+	/// <summary>
+	/// 编译错误
+	/// </summary>
 	struct compile_error {
 		const int row;
 		const int column;
@@ -17,6 +20,9 @@ namespace ssc {
 		virtual std::string to_string() const = 0;
 	};
 
+	/// <summary>
+	/// 词法错误
+	/// </summary>
 	class lex_error : compile_error {
 		int last_char;
 	public:
@@ -31,6 +37,9 @@ namespace ssc {
 		}
 	};
 
+	/// <summary>
+	/// 语法错误
+	/// </summary>
 	class parse_error : compile_error {
 	public:
 		parse_error(int row, int column) :
