@@ -8,3 +8,19 @@ void ssc::parser::parse() {
         lexeme = lex.pop_lexeme();
     }
 }
+
+/// <summary>
+/// struct { <struct_field>+ }
+/// </summary>
+/// <returns></returns>
+bool ssc::parser::match_struct() {
+
+}
+
+/// <summary>
+/// [identifier] [identifier] ;
+/// </summary>
+/// <returns></returns>
+bool ssc::parser::match_struct_field() {
+
+}

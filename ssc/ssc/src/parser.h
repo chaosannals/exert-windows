@@ -13,5 +13,8 @@ namespace ssc {
         parser(lexer& lex) : lex(lex) {}
 
         void parse();
+    private:
+        bool match_struct();
+        bool match_struct_field();
 	};
 }
