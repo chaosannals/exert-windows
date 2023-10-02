@@ -117,7 +117,27 @@ namespace ssc {
     // .bss 未初始化的数据（自由格式） image_scn_cnt_uninitialized_data | image_scn_mem_read | image_scn_mem_write
     // .cormeta CLR 元数据，目标文件包含托管代码 image_scn_lnk_info
     // .data 已初始化的数据（自由格式） image_scn_cnt_initialized_data | image_scn_mem_read | image_scn_mem_write
-    // .debug$F 
+    // .debug$F 生成的FPO 调试信息（仅适合目标文件，仅用于 x86 平台，已弃用）image_scn_cnt_initialized_data | image_scn_mem_read | image_scn_mem_discardable
+    // .debug$P 预编译的调试类型信息（仅适用于目标文件）image_scn_cnt_initialized_data | image_scn_mem_read | image_scn_mem_discardable
+    // .debug$S 调试符号信息（仅适用于目标文件）image_scn_cnt_initialized_data | image_scn_mem_read | image_scn_mem_discardable
+    // .debug$T 调试类型信息（仅适用于目标文件）image_scn_cnt_initialized_data | image_scn_mem_read | image_scn_mem_discardable
+    // .drective 链接器选项 image_scn_lnk_info
+    // .edata 导出表 image_scn_cnt_initialized_data | image_scn_mem_read
+    // .idata 导入表 image_scn_cnt_initialized_data | image_scn_mem_read | image_scn_mem_write
+    // .idlsym 包含已注册的 SEH（仅使用于映像文件），用以支持 IDL 属性。 image_scn_lnk_info
+    // .pdata 异常信息 image_scn_cnt_initialized_data | image_scn_mem_read
+    // .rdata 只读的已初始化数据 image_scn_cnt_initialized_data | image_scn_mem_read
+    // .reloc 映像文件的重定位信息 image_scn_cnt_initialized_data | image_scn_mem_read | image_scn_mem_discardable
+    // .rsrc 资源目录 image_scn_cnt_initialized_data | image_scn_mem_read
+    // .sbss 与 GP 相关的未初始化数据（自由格式） image_scn_cnt_uninitialized_data | image_scn_mem_read | image_scn_mem_write | image_scn_gprel ，其中 image_scn_gprel 只在 IA64 使用。此标志只能用于目标文件。
+    // .sdata 与 GP 相关的已初始化数据（自由格式） image_scn_cnt_initialized_data | image_scn_mem_read | image_scn_mem_write | image_scn_gprel ，其中 image_scn_gprel 只在 IA64 使用。此标志只能用于目标文件。
+    // .srdata 与 GP 相关的只读数据（自由格式） image_scn_cnt_initialized_data | image_scn_mem_read | image_scn_gprel ，其中 image_scn_gprel 只在 IA64 使用。此标志只能用于目标文件。
+    // .sxdata 已注册的异常处理程序数据（自由格式，仅目标文件，仅适用 x86） image_scn_lnk_info
+    // .text 可执行代码（自由格式） image_scn_cnt_code | image_scn_mem_execute | image_scn_mem_read
+    // .tls 线程局部存储（仅适用目标格式） image_scn_cnt_initialized_data | image_scn_mem_read | image_scn_mem_write
+    // .tls$ 线程局部存储（仅适用目标格式） image_scn_cnt_initialized_data | image_scn_mem_read | image_scn_mem_write
+    // .vsdata 与 GP 相关的已初始化数据（自由格式，仅适用 ARM、SH4 和 Thumb ）image_scn_cnt_initialized_data | image_scn_mem_read | image_scn_mem_write
+    // .xdata 异常信息（自由格式） image_scn_cnt_initialized_data | image_scn_mem_read | image_scn_mem_write
     struct coff_section_header {
         char name[8]; // UTF-8 8字节长节名，空位 \0 填充
         std::uint32_t virtual_size; // 可执行文件加载内存时节总大小，如果比 size_of_raw_data 大，多余部分填充 \0 ,对于目标文件应为 0。
