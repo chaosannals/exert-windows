@@ -77,14 +77,47 @@ namespace ssc {
         image_scn_cnt_initialized=0x00000040, // 此节包含初始化数据
         image_scn_cnt_uninitialized_data=0x00000080, // 此节包含未初始化数据
         image_scn_lnk_other=0x00000100, // 保留
-
-
+        image_scn_lnk_info=0x00000200, // 此节包含注释或其他信息。.drectve 节具有这种属性，此标记只对目标文件合法。
+        image_scn_lnk_remove=0x00000800, // 此节不会成为最终形成的映像文件的一部分，此标志仅对目标文件合法。
+        image_scn_lnk_comdat=0x00001000, // 此节包含 comdat 数据，此标志仅对目标文件合法。
+        image_scn_gprel=0x00008000, // 此节包含通过全局指针（GP）引用的数据。
+        image_scn_mem_purgeable=0x00020000, // 保留
+        image_scn_mem_16bit=0x00020000,//保留
+        image_scn_mem_locked=0x00040000, // 保留
+        image_scn_mem_preload=0x00080000, // 保留
+        image_scn_align_1bytes=0x00100000, // 按1字节对齐，此标志只对目标文件合法。
+        image_scn_align_2bytes = 0x00200000, // 按2字节对齐，此标志只对目标文件合法。
+        image_scn_align_4bytes = 0x00300000, // 按4字节对齐，此标志只对目标文件合法。
+        image_scn_align_8bytes = 0x00400000, // 按8字节对齐，此标志只对目标文件合法。
+        image_scn_align_16bytes = 0x00500000, // 按16字节对齐，此标志只对目标文件合法。
+        image_scn_align_32bytes = 0x00600000, // 按32字节对齐，此标志只对目标文件合法。
+        image_scn_align_64bytes = 0x00700000, // 按64字节对齐，此标志只对目标文件合法。
+        image_scn_align_128bytes = 0x00800000, // 按128字节对齐，此标志只对目标文件合法。
+        image_scn_align_256bytes = 0x00900000, // 按256字节对齐，此标志只对目标文件合法。
+        image_scn_align_512bytes = 0x00A00000, // 按512字节对齐，此标志只对目标文件合法。
+        image_scn_align_1024bytes = 0x00B00000, // 按1024字节对齐，此标志只对目标文件合法。
+        image_scn_align_2048bytes = 0x00C00000, // 按2048字节对齐，此标志只对目标文件合法。
+        image_scn_align_4096bytes = 0x00D00000, // 按4096字节对齐，此标志只对目标文件合法。
+        image_scn_align_8192bytes = 0x00E00000, // 按8192字节对齐，此标志只对目标文件合法。
+        image_scn_lnk_nreloc_ovfl=0x01000000, // 此节包含扩展的重定位信息
+        image_scn_mem_discardable=0x02000000, // 此节可以在需要时候丢弃
+        image_scn_mem_not_cached=0x04000000, // 此节不能被缓存
+        image_scn_mem_not_paged=0x08000000, // 此节不能被交换到页面文件中
+        image_scn_mem_shared=0x10000000, // 此节可以在内存中共享
+        image_scn_mem_execute=0x20000000, // 此节可以作为代码执行
+        image_scn_mem_read=0x40000000, // 此节可读
+        image_scn_mem_write=0x80000000, // 此节可写
     };
 
 
 #pragma pack(1)
     // COFF 节头
     // IMAGE_SECTION_HEADER
+    // 特殊节
+    // .bss 未初始化的数据（自由格式） image_scn_cnt_uninitialized_data | image_scn_mem_read | image_scn_mem_write
+    // .cormeta CLR 元数据，目标文件包含托管代码 image_scn_lnk_info
+    // .data 已初始化的数据（自由格式） image_scn_cnt_initialized_data | image_scn_mem_read | image_scn_mem_write
+    // .debug$F 
     struct coff_section_header {
         char name[8]; // UTF-8 8字节长节名，空位 \0 填充
         std::uint32_t virtual_size; // 可执行文件加载内存时节总大小，如果比 size_of_raw_data 大，多余部分填充 \0 ,对于目标文件应为 0。
