@@ -151,4 +151,35 @@ namespace ssc {
         coff_section_characteristics characteristics; // 节特征标志
     };
 #pragma pack()
+
+
+    // 存储类别
+    enum coff_symbol_storage_class : std::uint8_t {
+        image_sym_class_end_of_function = 0xFF, // 函数结尾的特殊符号，用于调试。
+        image_sym_class_null = 0, // 未赋予存储类别
+
+    };
+
+#pragma pack(1)
+    // 符号信息，如果只是编译使用，可以稍微自己定制，但是就不符合标准了。
+    // IMAGE_SYMBOL
+    struct coff_symbol {
+        union {
+            char short_name[8]; // 符号名小于8时，直接存这里
+            struct {
+                std::uint32_t is_short; // 大于 8 时，为 0
+                std::uint32_t offset; // 大于 8 时，为在符号表中偏移位置。
+            } name;
+            char* long_name[2];
+        }n;
+        std::uint32_t value; // 符号相关值，意义由 sction_number 和 storage_class 决定，通常表示可重定位的地址
+        std::uint16_t section_number; // 1. 节表索引（从1开始）节大小在 value 里。
+        // 2.为 IMAGE_SYM_UNDEFINED(0) 表示引用了其他地方的外部符号。
+        // 3. IMAGE_SYM_ABSOLUTE(-1) 此符号是绝对符号，并不是地址。
+        // 4. IMAGE_SYM_DEBUG(-2)符号提供普通类型信息或者调试信息。微软将 .file 记录设为该值 
+        std::uint16_t type; // 类型，微软 CST_FUNC(0x20) 是函数；CST_NOTFUNC(0x0) 不是函数。
+        coff_symbol_storage_class storage_class; // 存储类别
+        std::uint8_t number_of_aux_symbols; // 跟在本记录后面的辅助符号表项个数。
+    };
+#pragma pack()
 }
