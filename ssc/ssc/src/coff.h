@@ -157,6 +157,31 @@ namespace ssc {
     enum coff_symbol_storage_class : std::uint8_t {
         image_sym_class_end_of_function = 0xFF, // 函数结尾的特殊符号，用于调试。
         image_sym_class_null = 0, // 未赋予存储类别
+        image_sym_class_automatic=1, // 自动（堆栈）变量，value 指出此栈帧中的偏移量
+        image_sym_class_external=2, // 微软的工具使用此值来表示外部符号。如果 section_number 为 IMAGE_SYM_UNDEFINED(0) value 给出大小；如果 section_number 不为 0，value 给出节中偏移量
+        image_sym_class_static=3, // 符号在节中偏移。若 value = 0, 此符号表示节名。
+        image_sym_class_register=4, // 寄存器变量, value 给出寄存器编号。
+        image_sym_class_external_def=5, // 外部定义的符号，
+        image_sym_class_label=6, // 模块中定义的代码标号， value 给出符号在节中的偏移。
+        image_sym_class_undefined_label=7, // 引用的未定义的代码标号
+        image_sym_class_member_of_struct=8, // 结构成员，value 指出是第几个成员。
+        image_sym_class_argument=9, // 函数的形参，value 指出是第几个参数。
+        image_sym_class_struct_tag=10, // 结构体名
+        image_sym_class_member_of_union=11, // 共用体成员， value 指出是第几个成员
+        image_sym_class_union_tag = 12, // 共用体名
+        image_sym_class_type_definition=13, // typedef 项
+        image_sym_class_undefined_static=14, // 静态数据声明
+        image_sym_class_enum_tag=15, // 枚举类型名
+        image_sym_class_member_of_enum=16, // 枚举成员，value 指出是第几个成员
+        image_sym_class_register_param=17, // 寄存器参数
+        image_sym_class_bit_filed=18, // 位域， value 指出是位域的第几位
+        image_sym_class_block=100, // .bb(beginning of block,块头）或.eb记录（end of block，块尾）value 是代码位置，一个可重定位地址。
+        image_sym_class_function=101, // 微软工具用此值定义函数范围的符号记录，分别是 .bf (begin function）函数头； .ef（end function）函数尾 value 函数代码的大小；.lf（lines in function）函数中行 value 给出函数源码所占行数。
+        image_sym_class_end_of_struct=102, // 结构体尾
+        image_sym_class_file=103, // 微软工具表示 源文件符号记录，这种符号记录后面跟着给出文件名的辅助符号表记录
+        image_sym_class_section=104, // 节定义，微软工具使用 STATIC 存储类别替代
+        image_sym_class_weak_external=105, // 弱外部符号
+        image_sym_class_clr_token=107, // CLR 记号的符号。hex
 
     };
 
@@ -180,6 +205,23 @@ namespace ssc {
         std::uint16_t type; // 类型，微软 CST_FUNC(0x20) 是函数；CST_NOTFUNC(0x0) 不是函数。
         coff_symbol_storage_class storage_class; // 存储类别
         std::uint8_t number_of_aux_symbols; // 跟在本记录后面的辅助符号表项个数。
+    };
+#pragma pack()
+    // 重定位类型指示符
+    enum coff_relocation_type : std::uint16_t {
+        image_rel_i386_absolute=0x0000, // 重定位忽略
+
+    };
+
+#pragma pack(1)
+    // COFF 重定向信息
+    struct coff_relocation {
+        union {
+            std::uint32_t virtual_address;
+            std::uint32_t reloc_count;
+        };
+        std::uint32_t symbol_table_index;
+        coff_relocation_type type;
     };
 #pragma pack()
 }
