@@ -1,8 +1,15 @@
 ﻿#include <Windows.h>
 #include <strsafe.h>
 #include <detours.h>
+#include <format>
 
 #define HIJ_API extern "C" __declspec(dllexport)
+#ifdef UNICODE
+typedef std::wstring TSTRING;
+#else
+typedef std::string TSTRING;
+#endif
+
 
 typedef DWORD (*FnPtrTimeGetTime)();
 typedef MMRESULT (*FnPtrTimeEndPeriod)(UINT);
@@ -30,6 +37,12 @@ FnPtrMmioDescend mmioDescendPtr;
 FnPtrMmioAscend mmioAscendPtr;
 FnPtrMmioOpenA mmioOpenAPtr;
 
+template<typename ...Args>
+VOID Log(const TSTRING &format,const Args& ...args) {
+    auto content = std::vformat(format, std::make_format_args(args...));
+    OutputDebugString(content.c_str());
+}
+
 VOID AttachHij() {
     TCHAR systemDir[MAX_PATH] = { 0 };
     UINT systemDirLen = GetSystemDirectory(systemDir, MAX_PATH);
@@ -49,7 +62,8 @@ VOID AttachHij() {
         OutputDebugString("[winmm] winmm.dll path unknown.");
         return;
     }
-    OutputDebugString(winmmPath);
+    // OutputDebugString(winmmPath);
+    Log("[winmm] path: {}", winmmPath);
     HMODULE winmmMod = LoadLibrary(winmmPath);
     if (NULL == winmmMod) {
         OutputDebugString("[winmm] winmm.dll load failed.");
@@ -65,6 +79,8 @@ VOID AttachHij() {
     mmioAscendPtr = (FnPtrMmioAscend)GetProcAddress(winmmMod, "mmioAscend");
     mmioOpenAPtr = (FnPtrMmioOpenA)GetProcAddress(winmmMod, "mmioOpenA");
 }
+
+
 
 VOID DetachHij() {
 
@@ -129,5 +145,6 @@ HIJ_API HMMIO mmioOpenA(
     LPMMIOINFO pmmioinfo,
     DWORD      fdwOpen
 ) {
+    Log("[winmm] mmio open: {}", pszFileName);
     return mmioOpenAPtr(pszFileName, pmmioinfo, fdwOpen);
 }
