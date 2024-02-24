@@ -57,6 +57,31 @@ VOID Log(const TSTRING &format, const Args &...args)
     OutputDebugString(content.c_str());
 }
 
+HWND MyCreateWindowA(
+    LPCTSTR lpClassName,
+    LPCTSTR lpWindowName,
+    DWORD dwStyle,
+    int x,
+    int y,
+    int nWidth,
+    int nHeight,
+    HWND hWndParent,
+    HMENU hMenu,
+    HINSTANCE hInstance,
+    LPVOID lpParam) {
+    Log("[winmm] create window a: {} by {}", lpWindowName, lpClassName);
+    return createWindowAPtr(
+        lpClassName,
+        lpWindowName,
+        dwStyle,
+        x, y, nWidth, nHeight,
+        hWndParent,
+        hMenu,
+        hInstance,
+        lpParam
+    );
+}
+
 VOID AttachHij()
 {
     TCHAR systemDir[MAX_PATH] = {0};
@@ -98,13 +123,34 @@ VOID AttachHij()
     mmioAscendPtr = (FnPtrMmioAscend)GetProcAddress(winmmMod, "mmioAscend");
     mmioOpenAPtr = (FnPtrMmioOpenA)GetProcAddress(winmmMod, "mmioOpenA");
 
-    //DetourTransactionBegin();
-    //DetourUpdateThread(GetCurrentThread());
-    //createWindowAPtr = (FnPtrCreateWindowA)DetourFindFunction("User32.dll", "createWindowA");
+    DetourTransactionBegin();
+    DetourUpdateThread(GetCurrentThread());
+    auto user32Path = std::format(TEXT("{}/User32.dll"), systemDir);
+    Log("[winmm] user32: {}", user32Path);
+    createWindowAPtr = (FnPtrCreateWindowA)DetourFindFunction(user32Path.c_str(), "createWindowA");
+    DetourAttach(&createWindowAPtr, MyCreateWindowA);
+    LONG r = DetourTransactionCommit();
+    if (r != NO_ERROR) {
+        Log(
+            "[winmm] ERROR_INVALID_BLOCK: {} | ERROR_INVALID_HANDLE: {} | ERROR_INVALID_OPERATION: {} | ERROR_NOT_ENOUGH_MEMORY: {}",
+            ERROR_INVALID_BLOCK,
+            ERROR_INVALID_HANDLE,
+            ERROR_INVALID_OPERATION,
+            ERROR_NOT_ENOUGH_MEMORY
+        );
+        Log("[winmm] detours attach error: {}", r);
+    }
 }
 
 VOID DetachHij()
 {
+    DetourTransactionBegin();
+    DetourUpdateThread(GetCurrentThread());
+    DetourDetach(&createWindowAPtr, MyCreateWindowA);
+    LONG r = DetourTransactionCommit();
+    if (r != NO_ERROR) {
+        Log("[winmm] detours detach error: {}", r);
+    }
 }
 
 BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
