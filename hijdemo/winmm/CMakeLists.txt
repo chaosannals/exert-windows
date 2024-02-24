@@ -19,5 +19,6 @@ if(HIJ_WINMM_DLL_OUT_DIR)
         COMMAND ${CMAKE_COMMAND}
         ARGS -E copy winmm.dll ${HIJ_WINMM_DLL_OUT_DIR}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "install to ${HIJ_WINMM_DLL_OUT_DIR}"
     )
 endif()
