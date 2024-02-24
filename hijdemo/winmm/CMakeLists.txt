@@ -8,6 +8,7 @@ target_sources(
     winmm
     PRIVATE
     src/main.cpp
+    src/api.def
 )
 
 if(HIJ_WINMM_DLL_OUT_DIR)

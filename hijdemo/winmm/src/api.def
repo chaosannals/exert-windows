@@ -1,0 +1,11 @@
+﻿LIBRARY "winmm"
+EXPORTS
+    timeGetTime=myTimeGetTime @1
+    timeEndPeriod=myTimeEndPeriod @2
+    timeBeginPeriod=myTimeBeginPeriod @3
+    mmioRead=myMmioRead @4
+    mmioClose=myMmioClose @5
+    mmioSeek=myMmioSeek @6
+    mmioDescend=myMmioDescend @7
+    mmioAscend=myMmioAscend @8
+    mmioOpenA=myMmioOpenA @9
