@@ -1,4 +1,5 @@
 ﻿#include <Windows.h>
+#include <detours.h>
 
 #define HIJ_API extern "C" __declspec(dllexport)
 
