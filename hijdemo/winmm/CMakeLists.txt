@@ -7,3 +7,15 @@ target_sources(
     PRIVATE
     src/main.cpp
 )
+
+if(HIJ_WINMM_DLL_OUT_DIR)
+    # 当设置了输出目录时，把生成文件复制过去，方便调试。
+    message(STATUS "hij winmm.dll out: ${HIJ_WINMM_DLL_OUT_DIR}")
+    add_custom_command(
+        TARGET winmm
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND}
+        ARGS -E copy winmm.dll ${HIJ_WINMM_DLL_OUT_DIR}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    )
+endif()
