@@ -5,6 +5,7 @@ project(hijdemo)
 
 # 配置
 set(HIJ_WINMM_DLL_OUT_DIR "" CACHE PATH "hij winmm output dir.")
+set(HIJ_WININET_DLL_OUT_DIR "" CACHE PATH "hij wininet output dir.")
 
 
 # 引入 Detours
@@ -73,3 +74,4 @@ FetchContent_GetProperties(detours)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 add_subdirectory(winmm)
+add_subdirectory(wininet)

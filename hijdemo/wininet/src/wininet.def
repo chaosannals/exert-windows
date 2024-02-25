@@ -1,0 +1,5 @@
+﻿LIBRARY "wininet"
+EXPORTS
+    InternetConnectA = MyInternetConnectA @1
+    InternetOpenW = MyInternetOpenW @2
+    HttpEndRequestW = MyHttpEndRequestW @3
