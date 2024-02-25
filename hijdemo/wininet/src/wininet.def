@@ -3,3 +3,6 @@ EXPORTS
     InternetConnectA = MyInternetConnectA @1
     InternetOpenW = MyInternetOpenW @2
     HttpEndRequestW = MyHttpEndRequestW @3
+    InternetCloseHandle = MyInternetCloseHandle @4
+    HttpSendRequestExW = MyHttpSendRequestExW @5
+    InternetConnectW = MyInternetConnectW @6

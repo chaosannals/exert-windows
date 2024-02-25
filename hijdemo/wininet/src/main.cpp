@@ -32,6 +32,24 @@ typedef BOOL (*FnPtrHttpEndRequestW)(
     LPINTERNET_BUFFERSW lpBuffersOut,
     DWORD dwFlags,
     DWORD_PTR dwContext);
+typedef BOOL (*FnPtrInternetCloseHandle)(
+    HINTERNET hInternet);
+typedef BOOL (*FnPtrHttpSendRequestExW)(
+    HINTERNET hRequest,
+    LPINTERNET_BUFFERSW lpBuffersIn,
+    LPINTERNET_BUFFERSW lpBuffersOut,
+    DWORD dwFlags,
+    DWORD_PTR dwContext);
+
+typedef HINTERNET (*FnPtrInternetConnectW)(
+    HINTERNET hInternet,
+    LPCWSTR lpszServerName,
+    INTERNET_PORT nServerPort,
+    LPCWSTR lpszUserName,
+    LPCWSTR lpszPassword,
+    DWORD dwService,
+    DWORD dwFlags,
+    DWORD_PTR dwContext);
 
 typedef HWND (*FnPtrCreateWindowA)(
     LPCTSTR lpClassName,
@@ -49,6 +67,9 @@ typedef HWND (*FnPtrCreateWindowA)(
 FnPtrInternetConnectA internetConnectAPtr;
 FnPtrInternetOpenW internetOpenWPtr;
 FnPtrHttpEndRequestW httpEndRequestWPtr;
+FnPtrInternetCloseHandle internetCloseHandlePtr;
+FnPtrHttpSendRequestExW httpSendRequestExWPtr;
+FnPtrInternetConnectW internetConnectWPtr;
 
 FnPtrCreateWindowA createWindowAPtr;
 
@@ -120,6 +141,9 @@ VOID AttachHij()
     internetConnectAPtr = (FnPtrInternetConnectA)GetProcAddress(wininetMod, "InternetConnectA");
     internetOpenWPtr = (FnPtrInternetOpenW)GetProcAddress(wininetMod, "InternetOpenW");
     httpEndRequestWPtr = (FnPtrHttpEndRequestW)GetProcAddress(wininetMod, "HttpEndRequestW");
+    internetCloseHandlePtr = (FnPtrInternetCloseHandle)GetProcAddress(wininetMod, "InternetCloseHandle");
+    httpSendRequestExWPtr = (FnPtrHttpSendRequestExW)GetProcAddress(wininetMod, "HttpSendRequestExW");
+    internetConnectWPtr = (FnPtrInternetConnectW)GetProcAddress(wininetMod, "InternetConnectW");
 
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
@@ -224,6 +248,50 @@ HIJ_API BOOL MyHttpEndRequestW(
     return httpEndRequestWPtr(
         hRequest,
         lpBuffersOut,
+        dwFlags,
+        dwContext);
+}
+
+BOOL MyInternetCloseHandle(HINTERNET hInternet)
+{
+    Log("[wininet] MyInternetCloseHandle");
+    return internetCloseHandlePtr(hInternet);
+}
+
+BOOL MyHttpSendRequestExW(
+    HINTERNET hRequest,
+    LPINTERNET_BUFFERSW lpBuffersIn,
+    LPINTERNET_BUFFERSW lpBuffersOut,
+    DWORD dwFlags,
+    DWORD_PTR dwContext)
+{
+    Log("[wininet] MyHttpSendRequestExW");
+    return httpSendRequestExWPtr(
+        hRequest,
+        lpBuffersIn,
+        lpBuffersOut,
+        dwFlags,
+        dwContext);
+}
+
+HINTERNET MyInternetConnectW(
+    HINTERNET hInternet,
+    LPCWSTR lpszServerName,
+    INTERNET_PORT nServerPort,
+    LPCWSTR lpszUserName,
+    LPCWSTR lpszPassword,
+    DWORD dwService,
+    DWORD dwFlags,
+    DWORD_PTR dwContext)
+{
+    Log("[wininet] MyInternetConnectW");
+    return internetConnectWPtr(
+        hInternet,
+        lpszServerName,
+        nServerPort,
+        lpszUserName,
+        lpszPassword,
+        dwService,
         dwFlags,
         dwContext);
 }
