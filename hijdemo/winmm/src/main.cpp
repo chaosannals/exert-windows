@@ -125,9 +125,13 @@ VOID AttachHij()
 
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
-    auto user32Path = std::format(TEXT("{}/User32.dll"), systemDir);
+    auto user32Path = std::format(TEXT("{}\\User32.dll"), systemDir);
     Log("[winmm] user32: {}", user32Path);
     createWindowAPtr = (FnPtrCreateWindowA)DetourFindFunction(user32Path.c_str(), "createWindowA");
+    if (createWindowAPtr == nullptr) {
+        Log("[winmm] createWindowA DetourFindFunction failed");
+        return;
+    }
     DetourAttach(&createWindowAPtr, MyCreateWindowA);
     LONG r = DetourTransactionCommit();
     if (r != NO_ERROR) {
