@@ -23,12 +23,13 @@ typedef HMMIO (*FnPtrMmioOpenA)(
     LPMMIOINFO pmmioinfo,
     DWORD fdwOpen);
 
-typedef HWND (*FnPtrCreateWindowA)(
-    LPCTSTR lpClassName,
-    LPCTSTR lpWindowName,
+typedef HWND (*FnPtrCreateWindowExA)(
+    DWORD dwExStyle,
+    LPCSTR lpClassName,
+    LPCSTR lpWindowName,
     DWORD dwStyle,
-    int x,
-    int y,
+    int X,
+    int Y,
     int nWidth,
     int nHeight,
     HWND hWndParent,
@@ -48,7 +49,7 @@ FnPtrMmioDescend mmioDescendPtr;
 FnPtrMmioAscend mmioAscendPtr;
 FnPtrMmioOpenA mmioOpenAPtr;
 
-FnPtrCreateWindowA createWindowAPtr;
+FnPtrCreateWindowExA createWindowExAPtr;
 
 template <typename... Args>
 VOID Log(const TSTRING &format, const Args &...args)
@@ -57,29 +58,45 @@ VOID Log(const TSTRING &format, const Args &...args)
     OutputDebugString(content.c_str());
 }
 
-HWND MyCreateWindowA(
-    LPCTSTR lpClassName,
-    LPCTSTR lpWindowName,
+HWND MyCreateWindowExA(
+    DWORD dwExStyle,
+    LPCSTR lpClassName,
+    LPCSTR lpWindowName,
     DWORD dwStyle,
-    int x,
-    int y,
+    int X,
+    int Y,
     int nWidth,
     int nHeight,
     HWND hWndParent,
     HMENU hMenu,
     HINSTANCE hInstance,
-    LPVOID lpParam) {
+    LPVOID lpParam)
+{
     Log("[winmm] create window a: {} by {}", lpWindowName, lpClassName);
-    return createWindowAPtr(
+
+    HWND wnd = createWindowExAPtr(
+        dwExStyle,
         lpClassName,
         lpWindowName,
         dwStyle,
-        x, y, nWidth, nHeight,
+        X,
+        Y,
+        nWidth,
+        nHeight,
         hWndParent,
         hMenu,
         hInstance,
-        lpParam
-    );
+        lpParam);
+
+#ifdef HIJ_TARGET_WND_CLASS
+    std::string targetClass = HIJ_TARGET_WND_CLASS;
+    if (targetClass.compare(lpClassName) == 0)
+    {
+        Log("[winmm] is target window: {} by {} {}", lpWindowName, lpClassName, reinterpret_cast<std::size_t>(wnd));
+    }
+#endif
+
+    return wnd;
 }
 
 VOID AttachHij()
@@ -123,25 +140,36 @@ VOID AttachHij()
     mmioAscendPtr = (FnPtrMmioAscend)GetProcAddress(winmmMod, "mmioAscend");
     mmioOpenAPtr = (FnPtrMmioOpenA)GetProcAddress(winmmMod, "mmioOpenA");
 
-    DetourTransactionBegin();
-    DetourUpdateThread(GetCurrentThread());
-    auto user32Path = std::format(TEXT("{}\\User32.dll"), systemDir);
-    Log("[winmm] user32: {}", user32Path);
-    createWindowAPtr = (FnPtrCreateWindowA)DetourFindFunction(user32Path.c_str(), "createWindowA");
-    if (createWindowAPtr == nullptr) {
-        Log("[winmm] createWindowA DetourFindFunction failed");
+    LONG error = DetourTransactionBegin();
+    if (error != NO_ERROR)
+    {
+        Log("[winmm] ERROR_INVALID_OPERATION: {}, {}", ERROR_INVALID_OPERATION, error);
         return;
     }
-    DetourAttach(&createWindowAPtr, MyCreateWindowA);
+    error = DetourUpdateThread(GetCurrentThread());
+    if (error != NO_ERROR)
+    {
+        Log("[winmm] ERROR_NOT_ENOUGH_MEMORY: {}, {}", ERROR_NOT_ENOUGH_MEMORY, error);
+        return;
+    }
+    auto user32Path = std::format(TEXT("{}\\User32.dll"), systemDir);
+    Log("[winmm] user32: {}", user32Path);
+    createWindowExAPtr = (FnPtrCreateWindowExA)DetourFindFunction("User32.dll", "CreateWindowExA");
+    if (createWindowExAPtr == nullptr)
+    {
+        Log("[winmm] CreateWindowExA DetourFindFunction failed");
+        return;
+    }
+    DetourAttach(&createWindowExAPtr, MyCreateWindowExA);
     LONG r = DetourTransactionCommit();
-    if (r != NO_ERROR) {
+    if (r != NO_ERROR)
+    {
         Log(
             "[winmm] ERROR_INVALID_BLOCK: {} | ERROR_INVALID_HANDLE: {} | ERROR_INVALID_OPERATION: {} | ERROR_NOT_ENOUGH_MEMORY: {}",
             ERROR_INVALID_BLOCK,
             ERROR_INVALID_HANDLE,
             ERROR_INVALID_OPERATION,
-            ERROR_NOT_ENOUGH_MEMORY
-        );
+            ERROR_NOT_ENOUGH_MEMORY);
         Log("[winmm] detours attach error: {}", r);
     }
 }
@@ -150,9 +178,10 @@ VOID DetachHij()
 {
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
-    DetourDetach(&createWindowAPtr, MyCreateWindowA);
+    DetourDetach(&createWindowExAPtr, MyCreateWindowExA);
     LONG r = DetourTransactionCommit();
-    if (r != NO_ERROR) {
+    if (r != NO_ERROR)
+    {
         Log("[winmm] detours detach error: {}", r);
     }
 }

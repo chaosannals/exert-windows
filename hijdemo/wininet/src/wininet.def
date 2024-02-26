@@ -16,3 +16,5 @@ EXPORTS
     InternetQueryDataAvailable=MyInternetQueryDataAvailable @14
     InternetOpenUrlW=MyInternetOpenUrlW @15
     InternetReadFile=MyInternetReadFile @16
+    InternetGetLastResponseInfoW=MyInternetGetLastResponseInfoW @17
+    InternetSetFilePointer=MyInternetSetFilePointer @18

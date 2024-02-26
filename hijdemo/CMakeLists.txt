@@ -6,7 +6,13 @@ project(hijdemo)
 # 配置
 set(HIJ_WINMM_DLL_OUT_DIR "" CACHE PATH "hij winmm output dir.")
 set(HIJ_WININET_DLL_OUT_DIR "" CACHE PATH "hij wininet output dir.")
+set(HIJ_TARGET_WND_CLASS "button" CACHE STRING "hij target wnd class.")
+set(HIJ_TARGET_WND_TITLE "" CACHE STRING "hij target wnd title.")
 
+add_compile_definitions(
+    HIJ_TARGET_WND_CLASS="${HIJ_TARGET_WND_CLASS}"
+    HIJ_TARGET_WND_TITLE="${HIJ_TARGET_WND_TITLE}"
+)
 
 # 引入 Detours
 FetchContent_Declare(
