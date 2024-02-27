@@ -79,5 +79,51 @@ FetchContent_GetProperties(detours)
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
+FetchContent_Declare(
+    imgui
+    GIT_REPOSITORY git@github.com:ocornut/imgui.git
+    GIT_TAG v1.90.4
+    GIT_SHALLOW ON
+    GIT_PROGRESS ON
+)
+
+FetchContent_GetProperties(imgui)
+
+if (NOT imgui_POPULATED)
+    message(STATUS "populate imgui")
+    FetchContent_Populate(imgui)
+    message(STATUS "imgui src: ${imgui_SOURCE_DIR}")
+
+    add_library(imgui STATIC)
+    set_target_properties(imgui PROPERTIES CXX_STANDARD 20)
+
+    file(GLOB IMGUI_SRC "${imgui_SOURCE_DIR}/*.cpp")
+
+    
+    set(
+        IMGUI_BACKEND_SRC
+        "${imgui_SOURCE_DIR}/backends/imgui_impl_win32.cpp"
+        "${imgui_SOURCE_DIR}/backends/imgui_impl_dx9.cpp"
+    )
+    set(IMGUI_BACKEND_LIBS "d3d9.lib")
+
+    message(STATUS "imgui cpp: ${IMGUI_BACKEND_SRC} ${IMGUI_SRC}")
+    target_sources(
+        imgui
+        PRIVATE
+        ${IMGUI_SRC}
+        ${IMGUI_BACKEND_SRC}
+    )
+
+    message(STATUS "imgui libs: ${IMGUI_BACKEND_LIBS}")
+    target_link_libraries(imgui ${IMGUI_BACKEND_LIBS})
+
+    target_include_directories(
+        imgui
+        PUBLIC
+        "${imgui_SOURCE_DIR}"
+    )
+endif()
+
 add_subdirectory(winmm)
 add_subdirectory(wininet)

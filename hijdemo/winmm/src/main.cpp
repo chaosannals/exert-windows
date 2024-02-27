@@ -36,6 +36,13 @@ typedef HWND (*FnPtrCreateWindowExA)(
     HMENU hMenu,
     HINSTANCE hInstance,
     LPVOID lpParam);
+typedef ATOM (*FnPtrRegisterClassA)(
+    const WNDCLASSA* lpWndClass
+);
+typedef ATOM(*FnPtrRegisterClassExA)(
+    const WNDCLASSEXA* unnamedParam1
+);
+
 
 const TCHAR dllName[] = TEXT("winmm.dll");
 
@@ -50,12 +57,49 @@ FnPtrMmioAscend mmioAscendPtr;
 FnPtrMmioOpenA mmioOpenAPtr;
 
 FnPtrCreateWindowExA createWindowExAPtr;
+FnPtrRegisterClassA registerClassAPtr;
+FnPtrRegisterClassExA registerClassExAPtr;
+WNDPROC wndProcPtr;
 
 template <typename... Args>
 VOID Log(const TSTRING &format, const Args &...args)
 {
     auto content = std::vformat(format, std::make_format_args(args...));
     OutputDebugString(content.c_str());
+}
+
+LRESULT WINAPI MyWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+    return wndProcPtr(hWnd, msg, wParam, lParam);
+}
+
+ATOM MyRegisterClassA(
+    const WNDCLASSA* lpWndClass
+) {
+#ifdef HIJ_TARGET_WND_CLASS
+    std::string targetClass = HIJ_TARGET_WND_CLASS;
+    if (targetClass.compare(lpWndClass->lpszClassName) == 0)
+    {
+        wndProcPtr = lpWndClass->lpfnWndProc;
+        ((WNDCLASSA*)lpWndClass)->lpfnWndProc = MyWndProc;
+        Log("[winmm] {} wndproc: {} => {}", lpWndClass->lpszClassName, reinterpret_cast<std::size_t>(wndProcPtr), reinterpret_cast<std::size_t>(&MyWndProc));
+    }
+#endif
+    return registerClassAPtr(lpWndClass);
+}
+
+ATOM MyRegisterClassExA(
+    const WNDCLASSEXA* lpWndClass
+) {
+#ifdef HIJ_TARGET_WND_CLASS
+    std::string targetClass = HIJ_TARGET_WND_CLASS;
+    if (targetClass.compare(lpWndClass->lpszClassName) == 0)
+    {
+        wndProcPtr = lpWndClass->lpfnWndProc;
+        ((WNDCLASSA*)lpWndClass)->lpfnWndProc = MyWndProc;
+        Log("[winmm] {} wndproc ex: {} => {}", lpWndClass->lpszClassName, reinterpret_cast<std::size_t>(wndProcPtr), reinterpret_cast<std::size_t>(&MyWndProc));
+    }
+#endif
+    return registerClassExAPtr(lpWndClass);
 }
 
 HWND MyCreateWindowExA(
@@ -93,6 +137,8 @@ HWND MyCreateWindowExA(
     if (targetClass.compare(lpClassName) == 0)
     {
         Log("[winmm] is target window: {} by {} {}", lpWindowName, lpClassName, reinterpret_cast<std::size_t>(wnd));
+        auto wpp = (WNDPROC)GetWindowLongPtr(wnd, GWLP_WNDPROC);
+        Log("[winmm] is target window proc: {} ", reinterpret_cast<std::size_t>(wpp));
     }
 #endif
 
@@ -155,12 +201,21 @@ VOID AttachHij()
     auto user32Path = std::format(TEXT("{}\\User32.dll"), systemDir);
     Log("[winmm] user32: {}", user32Path);
     createWindowExAPtr = (FnPtrCreateWindowExA)DetourFindFunction("User32.dll", "CreateWindowExA");
-    if (createWindowExAPtr == nullptr)
+    registerClassAPtr = (FnPtrRegisterClassA)DetourFindFunction("User32.dll", "RegisterClassA");
+    registerClassExAPtr = (FnPtrRegisterClassExA)DetourFindFunction("User32.dll", "RegisterClassExA");
+    if (createWindowExAPtr == nullptr || registerClassAPtr == nullptr || registerClassExAPtr==nullptr)
     {
-        Log("[winmm] CreateWindowExA DetourFindFunction failed");
+        Log(
+            "[winmm] CreateWindowExA({}) or registerClassAPtr({}) or registerClassExAPtr({}) DetourFindFunction failed",
+            reinterpret_cast<std::size_t>(createWindowExAPtr),
+            reinterpret_cast<std::size_t>(registerClassAPtr),
+            reinterpret_cast<std::size_t>(registerClassExAPtr)
+        );
         return;
     }
     DetourAttach(&createWindowExAPtr, MyCreateWindowExA);
+    DetourAttach(&registerClassAPtr, MyRegisterClassA);
+    DetourAttach(&registerClassExAPtr, MyRegisterClassExA);
     LONG r = DetourTransactionCommit();
     if (r != NO_ERROR)
     {
@@ -179,6 +234,8 @@ VOID DetachHij()
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
     DetourDetach(&createWindowExAPtr, MyCreateWindowExA);
+    DetourDetach(&registerClassAPtr, MyRegisterClassA);
+    DetourDetach(&registerClassExAPtr, MyRegisterClassExA);
     LONG r = DetourTransactionCommit();
     if (r != NO_ERROR)
     {
