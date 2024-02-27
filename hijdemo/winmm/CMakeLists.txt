@@ -2,7 +2,7 @@
 
 set_property(TARGET winmm PROPERTY CXX_STANDARD 20)
 
-target_link_libraries(winmm detours)
+target_link_libraries(winmm detours imgui)
 
 target_sources(
     winmm
