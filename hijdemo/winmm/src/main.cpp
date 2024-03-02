@@ -1,31 +1,11 @@
 ﻿#include <Windows.h>
-#include <strsafe.h>
 #include <detours.h>
-#include <format>
 #include <thread>
 #include <d3d9.h>
 #include <backends/imgui_impl_win32.h>
 #include <backends/imgui_impl_dx9.h>
-
-#define HIJ_API extern "C" __declspec(dllexport)
-#ifdef UNICODE
-typedef std::wstring TSTRING;
-#else
-typedef std::string TSTRING;
-#endif
-
-typedef DWORD (*FnPtrTimeGetTime)();
-typedef MMRESULT (*FnPtrTimeEndPeriod)(UINT);
-typedef MMRESULT (*FnPtrTimeBeginPeriod)(UINT);
-typedef LONG (*FnPtrMmioRead)(HMMIO, HPSTR, LONG);
-typedef MMRESULT (*FnPtrMmioClose)(HMMIO, UINT);
-typedef LONG (*FnPtrMmioSeek)(HMMIO, LONG, int);
-typedef MMRESULT (*FnPtrMmioDescend)(HMMIO, LPMMCKINFO, const MMCKINFO *, UINT);
-typedef MMRESULT (*FnPtrMmioAscend)(HMMIO, LPMMCKINFO, UINT);
-typedef HMMIO (*FnPtrMmioOpenA)(
-    LPSTR pszFileName,
-    LPMMIOINFO pmmioinfo,
-    DWORD fdwOpen);
+#include "util.h"
+#include "hijack.h"
 
 typedef HWND (*FnPtrCreateWindowExA)(
     DWORD dwExStyle,
@@ -47,27 +27,15 @@ typedef ATOM(*FnPtrRegisterClassExA)(
     const WNDCLASSEXA* unnamedParam1
 );
 
- static LPDIRECT3D9              g_pD3D = nullptr;
+static LPDIRECT3D9              g_pD3D = nullptr;
 static LPDIRECT3DDEVICE9        g_pd3dDevice = nullptr;
 static UINT                     g_ResizeWidth = 0, g_ResizeHeight = 0;
 static D3DPRESENT_PARAMETERS    g_d3dpp = {};
-
-const TCHAR dllName[] = TEXT("winmm.dll");
 
 bool CreateDeviceD3D(HWND hWnd);
 void CleanupDeviceD3D();
 void ResetDevice();
 VOID renderD3d9(HWND wnd);
-
-FnPtrTimeGetTime timeGetTimePtr;
-FnPtrTimeEndPeriod timeEndPeriodPtr;
-FnPtrTimeBeginPeriod timeBeginPeriodPtr;
-FnPtrMmioRead mmioReadPtr;
-FnPtrMmioClose mmioClosePtr;
-FnPtrMmioSeek mmioSeekPtr;
-FnPtrMmioDescend mmioDescendPtr;
-FnPtrMmioAscend mmioAscendPtr;
-FnPtrMmioOpenA mmioOpenAPtr;
 
 FnPtrCreateWindowExA createWindowExAPtr;
 FnPtrRegisterClassA registerClassAPtr;
@@ -75,13 +43,6 @@ FnPtrRegisterClassExA registerClassExAPtr;
 WNDPROC wndProcPtr;
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
-template <typename... Args>
-VOID Log(const TSTRING &format, const Args &...args)
-{
-    auto content = std::vformat(format, std::make_format_args(args...));
-    OutputDebugString(content.c_str());
-}
 
 
 bool CreateDeviceD3D(HWND hWnd)
@@ -346,44 +307,7 @@ HWND MyCreateWindowExA(
 
 VOID AttachHij()
 {
-    TCHAR systemDir[MAX_PATH] = {0};
-    UINT systemDirLen = GetSystemDirectory(systemDir, MAX_PATH);
-    TCHAR winmmPath[MAX_PATH] = {0};
-    size_t nameLen = 0;
-    if (StringCchLength(dllName, MAX_PATH, &nameLen) != S_OK)
-    {
-        OutputDebugString("[winmm] winmm.dll name length unknown.");
-        return;
-    }
-    size_t systemDirEnd = systemDirLen + 1;
-    if (StringCchCopy(winmmPath, systemDirEnd, systemDir) != S_OK)
-    {
-        OutputDebugString("[winmm] system dir unknown.");
-        return;
-    }
-    winmmPath[systemDirLen] = TEXT('\\');
-    if (StringCchCopy(winmmPath + systemDirEnd, systemDirEnd + nameLen, dllName) != S_OK)
-    {
-        OutputDebugString("[winmm] winmm.dll path unknown.");
-        return;
-    }
-    // OutputDebugString(winmmPath);
-    Log("[winmm] path: {}", winmmPath);
-    HMODULE winmmMod = LoadLibrary(winmmPath);
-    if (NULL == winmmMod)
-    {
-        OutputDebugString("[winmm] winmm.dll load failed.");
-        return;
-    }
-    timeGetTimePtr = (FnPtrTimeGetTime)GetProcAddress(winmmMod, "timeGetTime");
-    timeEndPeriodPtr = (FnPtrTimeEndPeriod)GetProcAddress(winmmMod, "timeEndPeriod");
-    timeBeginPeriodPtr = (FnPtrTimeBeginPeriod)GetProcAddress(winmmMod, "timeBeginPeriod");
-    mmioReadPtr = (FnPtrMmioRead)GetProcAddress(winmmMod, "mmioRead");
-    mmioClosePtr = (FnPtrMmioClose)GetProcAddress(winmmMod, "mmioClose");
-    mmioSeekPtr = (FnPtrMmioSeek)GetProcAddress(winmmMod, "mmioSeek");
-    mmioDescendPtr = (FnPtrMmioDescend)GetProcAddress(winmmMod, "mmioDescend");
-    mmioAscendPtr = (FnPtrMmioAscend)GetProcAddress(winmmMod, "mmioAscend");
-    mmioOpenAPtr = (FnPtrMmioOpenA)GetProcAddress(winmmMod, "mmioOpenA");
+    Hijack_Winmm();
 
     LONG error = DetourTransactionBegin();
     if (error != NO_ERROR)
@@ -397,8 +321,8 @@ VOID AttachHij()
         Log("[winmm] ERROR_NOT_ENOUGH_MEMORY: {}, {}", ERROR_NOT_ENOUGH_MEMORY, error);
         return;
     }
-    auto user32Path = std::format(TEXT("{}\\User32.dll"), systemDir);
-    Log("[winmm] user32: {}", user32Path);
+    //auto user32Path = std::format(TEXT("{}\\User32.dll"), systemDir);
+    //Log("[winmm] user32: {}", user32Path);
     createWindowExAPtr = (FnPtrCreateWindowExA)DetourFindFunction("User32.dll", "CreateWindowExA");
     registerClassAPtr = (FnPtrRegisterClassA)DetourFindFunction("User32.dll", "RegisterClassA");
     registerClassExAPtr = (FnPtrRegisterClassExA)DetourFindFunction("User32.dll", "RegisterClassExA");
@@ -465,57 +389,4 @@ BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
     }
 
     return TRUE;
-}
-
-HIJ_API DWORD myTimeGetTime()
-{
-    return timeGetTimePtr();
-}
-
-HIJ_API MMRESULT myTimeEndPeriod(UINT period)
-{
-    return timeEndPeriodPtr(period);
-}
-
-HIJ_API MMRESULT myTimeBeginPeriod(UINT period)
-{
-    return timeBeginPeriodPtr(period);
-}
-
-HIJ_API LONG myMmioRead(HMMIO hmmio, HPSTR pch, LONG cch)
-{
-    return mmioReadPtr(hmmio, pch, cch);
-}
-
-HIJ_API MMRESULT myMmioClose(HMMIO hmmio, UINT fuClose)
-{
-    return mmioClosePtr(hmmio, fuClose);
-}
-
-HIJ_API LONG myMmioSeek(HMMIO hmmio, LONG lOffset, int iOrigin)
-{
-    return mmioSeekPtr(hmmio, lOffset, iOrigin);
-}
-
-HIJ_API MMRESULT myMmioDescend(
-    HMMIO hmmio,
-    LPMMCKINFO pmmcki,
-    const MMCKINFO *pmmckiParent,
-    UINT fuDescend)
-{
-    return mmioDescendPtr(hmmio, pmmcki, pmmckiParent, fuDescend);
-}
-
-HIJ_API MMRESULT myMmioAscend(HMMIO hmmio, LPMMCKINFO pmmcki, UINT fuAscend)
-{
-    return mmioAscendPtr(hmmio, pmmcki, fuAscend);
-}
-
-HIJ_API HMMIO myMmioOpenA(
-    LPSTR pszFileName,
-    LPMMIOINFO pmmioinfo,
-    DWORD fdwOpen)
-{
-    Log("[winmm] mmio open: {}", pszFileName);
-    return mmioOpenAPtr(pszFileName, pmmioinfo, fdwOpen);
 }

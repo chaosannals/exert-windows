@@ -9,7 +9,7 @@ target_sources(
     PRIVATE
     src/main.cpp
     src/api.def
-)
+ "src/hijack.cpp" "src/hijack.h" "src/util.h")
 
 if(HIJ_WINMM_DLL_OUT_DIR)
     # 当设置了输出目录时，把生成文件复制过去，方便调试。
