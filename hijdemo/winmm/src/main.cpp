@@ -1,6 +1,7 @@
 ﻿#include <Windows.h>
 #include <detours.h>
 #include <thread>
+#include <chrono>
 #include <d3d9.h>
 #include <backends/imgui_impl_win32.h>
 #include <backends/imgui_impl_dx9.h>
@@ -26,11 +27,28 @@ typedef ATOM (*FnPtrRegisterClassA)(
 typedef ATOM(*FnPtrRegisterClassExA)(
     const WNDCLASSEXA* unnamedParam1
 );
+typedef BOOL (*FnPtrPeekMessageA)(
+    LPMSG lpMsg,
+    HWND  hWnd,
+    UINT  wMsgFilterMin,
+     UINT  wMsgFilterMax,
+    UINT  wRemoveMsg
+);
+typedef BOOL(*FnPtrPeekMessageW)(
+    LPMSG lpMsg,
+    HWND  hWnd,
+    UINT  wMsgFilterMin,
+     UINT  wMsgFilterMax,
+    UINT  wRemoveMsg
+);
+
 
 static LPDIRECT3D9              g_pD3D = nullptr;
 static LPDIRECT3DDEVICE9        g_pd3dDevice = nullptr;
 static UINT                     g_ResizeWidth = 0, g_ResizeHeight = 0;
 static D3DPRESENT_PARAMETERS    g_d3dpp = {};
+static HWND g_wnd = nullptr;
+static long long g_render_at = 0;
 
 bool CreateDeviceD3D(HWND hWnd);
 void CleanupDeviceD3D();
@@ -40,6 +58,9 @@ VOID renderD3d9(HWND wnd);
 FnPtrCreateWindowExA createWindowExAPtr;
 FnPtrRegisterClassA registerClassAPtr;
 FnPtrRegisterClassExA registerClassExAPtr;
+FnPtrPeekMessageA peekMessageAPtr;
+FnPtrPeekMessageW peekMessageWPtr;
+
 WNDPROC wndProcPtr;
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -98,6 +119,7 @@ LRESULT WINAPI MyWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             //return 0;
         g_ResizeWidth = (UINT)LOWORD(lParam); // Queue resize
         g_ResizeHeight = (UINT)HIWORD(lParam);
+        Log("[winmm] window size. {}, {}", g_ResizeWidth, g_ResizeHeight);
         break;
     case WM_SHOWWINDOW:
         if (g_pD3D == nullptr) {
@@ -105,6 +127,7 @@ LRESULT WINAPI MyWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
             if (CreateDeviceD3D(hWnd)) {
                 Log("[winmm] d3d9 render start.");
+                g_wnd = hWnd;
                 // TODO
                 //std::thread d3dthread(renderD3d9, hWnd);
             }
@@ -193,10 +216,10 @@ VOID renderD3d9(HWND wnd) {
         // Handle window resize (we don't resize directly in the WM_SIZE handler)
         if (g_ResizeWidth != 0 && g_ResizeHeight != 0)
         {
-            g_d3dpp.BackBufferWidth = g_ResizeWidth;
-            g_d3dpp.BackBufferHeight = g_ResizeHeight;
-            g_ResizeWidth = g_ResizeHeight = 0;
-            ResetDevice();
+            //g_d3dpp.BackBufferWidth = g_ResizeWidth;
+            //g_d3dpp.BackBufferHeight = g_ResizeHeight;
+            //g_ResizeWidth = g_ResizeHeight = 0;
+            //ResetDevice();
         }
 
         // Start the Dear ImGui frame
@@ -305,6 +328,65 @@ HWND MyCreateWindowExA(
     return wnd;
 }
 
+BOOL MyPeekMessageA(
+    LPMSG lpMsg,
+    HWND  hWnd,
+    UINT  wMsgFilterMin,
+    UINT  wMsgFilterMax,
+    UINT  wRemoveMsg
+) {
+    /*
+    Log(
+        "[winmm] peek message a: {} the {} at {}",
+        reinterpret_cast<std::size_t>(hWnd),
+        lpMsg->message,
+        lpMsg->time
+    );
+    */
+    //if (g_wnd == hWnd) {
+    if (g_wnd) {
+        auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
+        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
+        auto dms = ms - g_render_at;
+        if (dms > 100) {
+            g_render_at = ms;
+            //renderD3d9(g_wnd);
+        }
+    }
+    return peekMessageAPtr(
+        lpMsg,
+        hWnd,
+        wMsgFilterMin,
+        wMsgFilterMax,
+        wRemoveMsg
+    );
+}
+
+BOOL MyPeekMessageW(
+    LPMSG lpMsg,
+    HWND  hWnd,
+    UINT  wMsgFilterMin,
+    UINT  wMsgFilterMax,
+    UINT  wRemoveMsg
+) {
+    /*
+    Log(
+        "[winmm] peek message w: {} the {} at {}",
+        reinterpret_cast<std::size_t>(hWnd),
+        lpMsg->message,
+        lpMsg->time
+    );
+    */
+    return peekMessageWPtr(
+        lpMsg,
+        hWnd,
+        wMsgFilterMin,
+        wMsgFilterMax,
+        wRemoveMsg
+    );
+}
+
+
 VOID AttachHij()
 {
     Hijack_Winmm();
@@ -326,19 +408,30 @@ VOID AttachHij()
     createWindowExAPtr = (FnPtrCreateWindowExA)DetourFindFunction("User32.dll", "CreateWindowExA");
     registerClassAPtr = (FnPtrRegisterClassA)DetourFindFunction("User32.dll", "RegisterClassA");
     registerClassExAPtr = (FnPtrRegisterClassExA)DetourFindFunction("User32.dll", "RegisterClassExA");
-    if (createWindowExAPtr == nullptr || registerClassAPtr == nullptr || registerClassExAPtr==nullptr)
-    {
+    peekMessageAPtr= (FnPtrPeekMessageA)DetourFindFunction("User32.dll", "PeekMessageA");
+    peekMessageWPtr= (FnPtrPeekMessageW)DetourFindFunction("User32.dll", "PeekMessageW");
+    if (
+        createWindowExAPtr == nullptr ||
+        registerClassAPtr == nullptr ||
+        registerClassExAPtr==nullptr ||
+        peekMessageAPtr == nullptr ||
+        peekMessageWPtr == nullptr
+    ) {
         Log(
-            "[winmm] CreateWindowExA({}) or registerClassAPtr({}) or registerClassExAPtr({}) DetourFindFunction failed",
+            "[winmm] CreateWindowExA({}) or registerClassAPtr({}) or registerClassExAPtr({}) or peekMessageAPtr({}) or peekMessageWPtr({}) DetourFindFunction failed",
             reinterpret_cast<std::size_t>(createWindowExAPtr),
             reinterpret_cast<std::size_t>(registerClassAPtr),
-            reinterpret_cast<std::size_t>(registerClassExAPtr)
+            reinterpret_cast<std::size_t>(registerClassExAPtr),
+            reinterpret_cast<std::size_t>(peekMessageAPtr),
+            reinterpret_cast<std::size_t>(peekMessageWPtr)
         );
         return;
     }
     DetourAttach(&createWindowExAPtr, MyCreateWindowExA);
     DetourAttach(&registerClassAPtr, MyRegisterClassA);
     DetourAttach(&registerClassExAPtr, MyRegisterClassExA);
+    DetourAttach(&peekMessageAPtr, MyPeekMessageA);
+    DetourAttach(&peekMessageWPtr, MyPeekMessageW);
     LONG r = DetourTransactionCommit();
     if (r != NO_ERROR)
     {
@@ -365,6 +458,8 @@ VOID DetachHij()
     DetourDetach(&createWindowExAPtr, MyCreateWindowExA);
     DetourDetach(&registerClassAPtr, MyRegisterClassA);
     DetourDetach(&registerClassExAPtr, MyRegisterClassExA);
+    DetourDetach(&peekMessageAPtr, MyPeekMessageA);
+    DetourDetach(&peekMessageWPtr, MyPeekMessageW);
     LONG r = DetourTransactionCommit();
     if (r != NO_ERROR)
     {
