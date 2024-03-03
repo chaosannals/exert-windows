@@ -61,10 +61,17 @@ FnPtrRegisterClassExA registerClassExAPtr;
 FnPtrPeekMessageA peekMessageAPtr;
 FnPtrPeekMessageW peekMessageWPtr;
 
+// TODO LoadLibrary
+
 WNDPROC wndProcPtr;
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+
+VOID MyTimer(HWND hwnd, UINT msg, UINT_PTR timerId, DWORD dwTime) {
+    Log("[winmm] timer {} tick {}", timerId, dwTime);
+    renderD3d9(hwnd);
+}
 
 bool CreateDeviceD3D(HWND hWnd)
 {
@@ -128,6 +135,7 @@ LRESULT WINAPI MyWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             if (CreateDeviceD3D(hWnd)) {
                 Log("[winmm] d3d9 render start.");
                 g_wnd = hWnd;
+                SetTimer(hWnd, 4444, 100, MyTimer);
                 // TODO
                 //std::thread d3dthread(renderD3d9, hWnd);
             }
@@ -211,8 +219,8 @@ VOID renderD3d9(HWND wnd) {
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-    bool done = false;
-    while (!done) {
+    //bool done = false;
+    //while (!done) {
         // Handle window resize (we don't resize directly in the WM_SIZE handler)
         if (g_ResizeWidth != 0 && g_ResizeHeight != 0)
         {
@@ -282,7 +290,7 @@ VOID renderD3d9(HWND wnd) {
         // Handle loss of D3D9 device
         if (result == D3DERR_DEVICELOST && g_pd3dDevice->TestCooperativeLevel() == D3DERR_DEVICENOTRESET)
             ResetDevice();
-    }
+    //}
 }
 
 HWND MyCreateWindowExA(
