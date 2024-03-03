@@ -196,6 +196,8 @@ ATOM MyRegisterClassExA(
     return registerClassExAPtr(lpWndClass);
 }
 
+
+// TODO 在目标窗口上开子窗口，不然会和原程序渲染互相刷掉，闪烁。
 VOID renderD3d9(HWND wnd) {
     Log("[winmm] d3d9 thread start.");
 
