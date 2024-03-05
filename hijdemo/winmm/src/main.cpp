@@ -42,6 +42,14 @@ typedef BOOL(*FnPtrPeekMessageW)(
     UINT  wRemoveMsg
 );
 
+typedef IDirect3D9* (*FnPtrDirect3DCreate9)(
+    UINT SDKVersion
+);
+typedef HRESULT (*FnPtrDirect3DCreate9Ex)(
+    UINT         SDKVersion,
+    IDirect3D9Ex** unnamedParam2
+);
+
 
 static LPDIRECT3D9              g_pD3D = nullptr;
 static LPDIRECT3DDEVICE9        g_pd3dDevice = nullptr;
@@ -60,10 +68,87 @@ FnPtrRegisterClassA registerClassAPtr;
 FnPtrRegisterClassExA registerClassExAPtr;
 FnPtrPeekMessageA peekMessageAPtr;
 FnPtrPeekMessageW peekMessageWPtr;
+FnPtrDirect3DCreate9 direct3DCreate9Ptr;
+FnPtrDirect3DCreate9Ex direct3DCreate9ExPtr;
 
 // TODO LoadLibrary
 
 WNDPROC wndProcPtr;
+
+struct MyDirect3D9 : public IDirect3D9 {
+    IDirect3D9* d3d9;
+
+    MyDirect3D9(IDirect3D9* p) :d3d9(p) {}
+
+    virtual ~MyDirect3D9() {
+        if (d3d9) {
+            d3d9->~IDirect3D9();
+        }
+    }
+
+    /*** IUnknown methods ***/
+    virtual HRESULT QueryInterface(THIS_ REFIID riid, void** ppvObj) {
+        Log("[winmm] d3d9 QueryInterface");
+        return d3d9->QueryInterface(riid, ppvObj);
+    }
+    virtual ULONG AddRef() {
+        Log("[winmm] d3d9 AddRef");
+        return d3d9->AddRef();
+    }
+    virtual ULONG Release() {
+        Log("[winmm] d3d9 Release");
+        return d3d9->Release();
+    }
+
+    /*** IDirect3D9 methods ***/
+    virtual HRESULT RegisterSoftwareDevice(THIS_ void* pInitializeFunction) {
+        return d3d9->RegisterSoftwareDevice(pInitializeFunction);
+    }
+    virtual UINT GetAdapterCount() {
+        return d3d9->GetAdapterCount();
+    }
+    virtual HRESULT GetAdapterIdentifier(THIS_ UINT Adapter, DWORD Flags, D3DADAPTER_IDENTIFIER9* pIdentifier) {
+        return d3d9->GetAdapterIdentifier(Adapter, Flags, pIdentifier);
+    }
+    virtual UINT GetAdapterModeCount(THIS_ UINT Adapter, D3DFORMAT Format) {
+        return d3d9->GetAdapterModeCount(Adapter, Format);
+    }
+    virtual HRESULT EnumAdapterModes(THIS_ UINT Adapter, D3DFORMAT Format, UINT Mode, D3DDISPLAYMODE* pMode) {
+        return d3d9->EnumAdapterModes(Adapter, Format, Mode, pMode);
+    }
+    virtual HRESULT GetAdapterDisplayMode(THIS_ UINT Adapter, D3DDISPLAYMODE* pMode) {
+        return d3d9->GetAdapterDisplayMode(Adapter, pMode);
+    }
+    virtual HRESULT CheckDeviceType(THIS_ UINT Adapter, D3DDEVTYPE DevType, D3DFORMAT AdapterFormat, D3DFORMAT BackBufferFormat, BOOL bWindowed) {
+        return d3d9->CheckDeviceType(Adapter, DevType, AdapterFormat, BackBufferFormat, bWindowed);
+    }
+    virtual HRESULT CheckDeviceFormat(THIS_ UINT Adapter, D3DDEVTYPE DeviceType, D3DFORMAT AdapterFormat, DWORD Usage, D3DRESOURCETYPE RType, D3DFORMAT CheckFormat) {
+        return d3d9->CheckDeviceFormat(Adapter, DeviceType, AdapterFormat, Usage, RType, CheckFormat);
+    }
+    virtual HRESULT CheckDeviceMultiSampleType(THIS_ UINT Adapter, D3DDEVTYPE DeviceType, D3DFORMAT SurfaceFormat, BOOL Windowed, D3DMULTISAMPLE_TYPE MultiSampleType, DWORD* pQualityLevels) {
+        return d3d9->CheckDeviceMultiSampleType(Adapter, DeviceType, SurfaceFormat, Windowed, MultiSampleType, pQualityLevels);
+    }
+    virtual HRESULT CheckDepthStencilMatch(THIS_ UINT Adapter, D3DDEVTYPE DeviceType, D3DFORMAT AdapterFormat, D3DFORMAT RenderTargetFormat, D3DFORMAT DepthStencilFormat) {
+        return d3d9->CheckDepthStencilMatch(Adapter, DeviceType, AdapterFormat, RenderTargetFormat, DepthStencilFormat);
+    }
+    virtual HRESULT CheckDeviceFormatConversion(THIS_ UINT Adapter, D3DDEVTYPE DeviceType, D3DFORMAT SourceFormat, D3DFORMAT TargetFormat) {
+        return d3d9->CheckDeviceFormatConversion(Adapter, DeviceType, SourceFormat, TargetFormat);
+    }
+    virtual HRESULT GetDeviceCaps(THIS_ UINT Adapter, D3DDEVTYPE DeviceType, D3DCAPS9* pCaps) {
+        return d3d9->GetDeviceCaps(Adapter, DeviceType, pCaps);
+    }
+    virtual HMONITOR GetAdapterMonitor(THIS_ UINT Adapter) {
+        return d3d9->GetAdapterMonitor(Adapter);
+    }
+    virtual HRESULT(CreateDevice)(THIS_ UINT Adapter, D3DDEVTYPE DeviceType, HWND hFocusWindow, DWORD BehaviorFlags, D3DPRESENT_PARAMETERS* pPresentationParameters, IDirect3DDevice9** ppReturnedDeviceInterface) {
+        Log("[winmm] d3d9 CreateDevice");
+        HRESULT r = d3d9->CreateDevice(Adapter, DeviceType, hFocusWindow, BehaviorFlags, pPresentationParameters, ppReturnedDeviceInterface);
+        Log("[winmm] d3d9 CreateDevice p; {}", reinterpret_cast<std::size_t>(*ppReturnedDeviceInterface));
+        g_pd3dDevice = *ppReturnedDeviceInterface;
+        return r;
+    }
+
+};
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -73,46 +158,46 @@ VOID MyTimer(HWND hwnd, UINT msg, UINT_PTR timerId, DWORD dwTime) {
     renderD3d9(hwnd);
 }
 
-bool CreateDeviceD3D(HWND hWnd)
-{
-    if ((g_pD3D = Direct3DCreate9(D3D_SDK_VERSION)) == nullptr) {
-        Log("[winmm] create d3d9 failed.");
-        return false;
-    }
+//bool CreateDeviceD3D(HWND hWnd)
+//{
+//    if ((g_pD3D = Direct3DCreate9(D3D_SDK_VERSION)) == nullptr) {
+//        Log("[winmm] create d3d9 failed.");
+//        return false;
+//    }
+//
+//    // Create the D3DDevice
+//    ZeroMemory(&g_d3dpp, sizeof(g_d3dpp));
+//    g_d3dpp.Windowed = TRUE;
+//    g_d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
+//    g_d3dpp.BackBufferFormat = D3DFMT_UNKNOWN; // Need to use an explicit format with alpha if needing per-pixel alpha composition.
+//    g_d3dpp.EnableAutoDepthStencil = TRUE;
+//    g_d3dpp.AutoDepthStencilFormat = D3DFMT_D16;
+//    g_d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;           // Present with vsync
+//    //g_d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;   // Present without vsync, maximum unthrottled framerate
+//    if (g_pD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, &g_d3dpp, &g_pd3dDevice) < 0) {
+//        Log("[winmm] create d3d9 device failed.");
+//        return false;
+//    }
+//    Log("[winmm] create d3d9 device.");
+//    return true;
+//}
 
-    // Create the D3DDevice
-    ZeroMemory(&g_d3dpp, sizeof(g_d3dpp));
-    g_d3dpp.Windowed = TRUE;
-    g_d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
-    g_d3dpp.BackBufferFormat = D3DFMT_UNKNOWN; // Need to use an explicit format with alpha if needing per-pixel alpha composition.
-    g_d3dpp.EnableAutoDepthStencil = TRUE;
-    g_d3dpp.AutoDepthStencilFormat = D3DFMT_D16;
-    g_d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;           // Present with vsync
-    //g_d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;   // Present without vsync, maximum unthrottled framerate
-    if (g_pD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, &g_d3dpp, &g_pd3dDevice) < 0) {
-        Log("[winmm] create d3d9 device failed.");
-        return false;
-    }
-    Log("[winmm] create d3d9 device.");
-    return true;
-}
+//void CleanupDeviceD3D()
+//{
+//    Log("[winmm] CleanupDeviceD3D.");
+//    if (g_pd3dDevice) { g_pd3dDevice->Release(); g_pd3dDevice = nullptr; }
+//    //if (g_pD3D) { g_pD3D->Release(); g_pD3D = nullptr; }
+//}
 
-void CleanupDeviceD3D()
-{
-    Log("[winmm] CleanupDeviceD3D.");
-    if (g_pd3dDevice) { g_pd3dDevice->Release(); g_pd3dDevice = nullptr; }
-    //if (g_pD3D) { g_pD3D->Release(); g_pD3D = nullptr; }
-}
-
-void ResetDevice()
-{
-    Log("[winmm] ResetDevice.");
-    ImGui_ImplDX9_InvalidateDeviceObjects();
-    HRESULT hr = g_pd3dDevice->Reset(&g_d3dpp);
-    if (hr == D3DERR_INVALIDCALL)
-        IM_ASSERT(0);
-    ImGui_ImplDX9_CreateDeviceObjects();
-}
+//void ResetDevice()
+//{
+//    Log("[winmm] ResetDevice.");
+//    ImGui_ImplDX9_InvalidateDeviceObjects();
+//    HRESULT hr = g_pd3dDevice->Reset(&g_d3dpp);
+//    if (hr == D3DERR_INVALIDCALL)
+//        IM_ASSERT(0);
+//    ImGui_ImplDX9_CreateDeviceObjects();
+//}
 
 LRESULT WINAPI MyWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
@@ -132,13 +217,13 @@ LRESULT WINAPI MyWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         if (g_pD3D == nullptr) {
             Log("[winmm] window show.");
 
-            if (CreateDeviceD3D(hWnd)) {
-                Log("[winmm] d3d9 render start.");
-                g_wnd = hWnd;
-                SetTimer(hWnd, 4444, 100, MyTimer);
+            //if (CreateDeviceD3D(hWnd)) {
+            //    Log("[winmm] d3d9 render start.");
+            //    g_wnd = hWnd;
+            //    SetTimer(hWnd, 4444, 100, MyTimer);
                 // TODO
                 //std::thread d3dthread(renderD3d9, hWnd);
-            }
+            //}
 
            /* g_pD3D = Direct3DCreate9(D3D_SDK_VERSION);
 
@@ -290,8 +375,8 @@ VOID renderD3d9(HWND wnd) {
         HRESULT result = g_pd3dDevice->Present(nullptr, nullptr, nullptr, nullptr);
 
         // Handle loss of D3D9 device
-        if (result == D3DERR_DEVICELOST && g_pd3dDevice->TestCooperativeLevel() == D3DERR_DEVICENOTRESET)
-            ResetDevice();
+        /*if (result == D3DERR_DEVICELOST && g_pd3dDevice->TestCooperativeLevel() == D3DERR_DEVICENOTRESET)
+            ResetDevice();*/
     //}
 }
 
@@ -396,6 +481,23 @@ BOOL MyPeekMessageW(
     );
 }
 
+IDirect3D9* MyDirect3DCreate9(
+    UINT SDKVersion
+) {
+    Log("[winmm] MyDirect3DCreate9: {}", SDKVersion);
+    IDirect3D9 *p = direct3DCreate9Ptr(SDKVersion);
+    Log("[winmm] MyDirect3DCreate9 p: {}", reinterpret_cast<std::size_t>(p));
+    g_pD3D = p;
+    return new MyDirect3D9(p);
+}
+
+HRESULT MyDirect3DCreate9Ex(
+    UINT         SDKVersion,
+    IDirect3D9Ex** unnamedParam2
+) {
+    Log("[winmm] MyDirect3DCreate9Ex: {}", SDKVersion);
+    return direct3DCreate9ExPtr(SDKVersion, unnamedParam2);
+}
 
 VOID AttachHij()
 {
@@ -420,20 +522,26 @@ VOID AttachHij()
     registerClassExAPtr = (FnPtrRegisterClassExA)DetourFindFunction("User32.dll", "RegisterClassExA");
     peekMessageAPtr= (FnPtrPeekMessageA)DetourFindFunction("User32.dll", "PeekMessageA");
     peekMessageWPtr= (FnPtrPeekMessageW)DetourFindFunction("User32.dll", "PeekMessageW");
+    direct3DCreate9Ptr = (FnPtrDirect3DCreate9)DetourFindFunction("d3d9.dll", "Direct3DCreate9");
+    direct3DCreate9ExPtr = (FnPtrDirect3DCreate9Ex)DetourFindFunction("d3d9.dll", "Direct3DCreate9Ex");
     if (
         createWindowExAPtr == nullptr ||
         registerClassAPtr == nullptr ||
         registerClassExAPtr==nullptr ||
         peekMessageAPtr == nullptr ||
-        peekMessageWPtr == nullptr
+        peekMessageWPtr == nullptr ||
+        direct3DCreate9Ptr == nullptr ||
+        direct3DCreate9ExPtr == nullptr
     ) {
         Log(
-            "[winmm] CreateWindowExA({}) or registerClassAPtr({}) or registerClassExAPtr({}) or peekMessageAPtr({}) or peekMessageWPtr({}) DetourFindFunction failed",
+            "[winmm] CreateWindowExA({}) or registerClassAPtr({}) or registerClassExAPtr({}) or peekMessageAPtr({}) or peekMessageWPtr({}) or direct3DCreate9Ptr({}) or direct3DCreate9ExPtr({}) DetourFindFunction failed",
             reinterpret_cast<std::size_t>(createWindowExAPtr),
             reinterpret_cast<std::size_t>(registerClassAPtr),
             reinterpret_cast<std::size_t>(registerClassExAPtr),
             reinterpret_cast<std::size_t>(peekMessageAPtr),
-            reinterpret_cast<std::size_t>(peekMessageWPtr)
+            reinterpret_cast<std::size_t>(peekMessageWPtr),
+            reinterpret_cast<std::size_t>(direct3DCreate9Ptr),
+            reinterpret_cast<std::size_t>(direct3DCreate9ExPtr)
         );
         return;
     }
@@ -442,6 +550,8 @@ VOID AttachHij()
     DetourAttach(&registerClassExAPtr, MyRegisterClassExA);
     DetourAttach(&peekMessageAPtr, MyPeekMessageA);
     DetourAttach(&peekMessageWPtr, MyPeekMessageW);
+    DetourAttach(&direct3DCreate9Ptr, MyDirect3DCreate9);
+    DetourAttach(&direct3DCreate9ExPtr, MyDirect3DCreate9Ex);
     LONG r = DetourTransactionCommit();
     if (r != NO_ERROR)
     {
@@ -461,7 +571,7 @@ VOID DetachHij()
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
 
-    CleanupDeviceD3D();
+    //CleanupDeviceD3D();
 
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
@@ -470,6 +580,8 @@ VOID DetachHij()
     DetourDetach(&registerClassExAPtr, MyRegisterClassExA);
     DetourDetach(&peekMessageAPtr, MyPeekMessageA);
     DetourDetach(&peekMessageWPtr, MyPeekMessageW);
+    DetourDetach(&direct3DCreate9Ptr, MyDirect3DCreate9);
+    DetourDetach(&direct3DCreate9ExPtr, MyDirect3DCreate9Ex);
     LONG r = DetourTransactionCommit();
     if (r != NO_ERROR)
     {
