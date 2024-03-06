@@ -7,6 +7,10 @@
 #include <backends/imgui_impl_dx9.h>
 #include "util.h"
 #include "hijack.h"
+#include "d3d9vt.h"
+
+extern "C" FnPtrPresent HookD3d9Device(LPDIRECT3DDEVICE9 device);
+FnPtrPresent g_persentPtr;
 
 typedef HWND (*FnPtrCreateWindowExA)(
     DWORD dwExStyle,
@@ -74,6 +78,11 @@ FnPtrDirect3DCreate9Ex direct3DCreate9ExPtr;
 // TODO LoadLibrary
 
 WNDPROC wndProcPtr;
+
+HRESULT MyPresent(LPDIRECT3DDEVICE9 device, CONST RECT* pSourceRect, CONST RECT* pDestRect, HWND hDestWindowOverride, CONST RGNDATA* pDirtyRegion) {
+    Log("[winmm] MyPresent");
+    return g_persentPtr(device, pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion);
+}
 
 struct MyDirect3D9 : public IDirect3D9 {
     IDirect3D9* d3d9;
@@ -145,6 +154,27 @@ struct MyDirect3D9 : public IDirect3D9 {
         HRESULT r = d3d9->CreateDevice(Adapter, DeviceType, hFocusWindow, BehaviorFlags, pPresentationParameters, ppReturnedDeviceInterface);
         Log("[winmm] d3d9 CreateDevice p; {}", reinterpret_cast<std::size_t>(*ppReturnedDeviceInterface));
         g_pd3dDevice = *ppReturnedDeviceInterface;
+        g_persentPtr = HookD3d9Device(g_pd3dDevice);
+        Log("[winmm] d3d9 persent p; {}", reinterpret_cast<std::size_t>(g_persentPtr));
+
+        DetourTransactionBegin();
+        DetourUpdateThread(GetCurrentThread());
+
+        // 不报错，但是没有效果，不知道是不是这里太迟了。
+        DetourAttach(&g_persentPtr, MyPresent);
+
+        LONG dr = DetourTransactionCommit();
+        if (dr != NO_ERROR)
+        {
+            Log(
+                "[winmm] ERROR_INVALID_BLOCK: {} | ERROR_INVALID_HANDLE: {} | ERROR_INVALID_OPERATION: {} | ERROR_NOT_ENOUGH_MEMORY: {}",
+                ERROR_INVALID_BLOCK,
+                ERROR_INVALID_HANDLE,
+                ERROR_INVALID_OPERATION,
+                ERROR_NOT_ENOUGH_MEMORY);
+            Log("[winmm] detours attach error: {}", dr);
+        }
+
         return r;
     }
 

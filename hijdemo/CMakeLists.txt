@@ -125,5 +125,6 @@ if (NOT imgui_POPULATED)
     )
 endif()
 
+add_subdirectory(cd3d9)
 add_subdirectory(winmm)
 add_subdirectory(wininet)
