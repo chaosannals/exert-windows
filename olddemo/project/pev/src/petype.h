@@ -5,7 +5,7 @@
 
 #pragma pack(1)
 struct dos_header_t {
-	char magic_number[2];
+	char magic_number[2]; // MZ
 	std::uint16_t last_page_bytes_count;
 	std::uint16_t pages_count;
 	std::uint16_t relocations;
@@ -78,7 +78,7 @@ enum pe_characteristic_e : std::uint16_t {
 
 #pragma pack(1)
 struct pe_header_t {
-	char magic_number[4];
+	char magic_number[4]; // PE\0\0
 	pe_machine_e machine;
 	std::uint16_t sections_count; // 节数
 	std::uint32_t create_timestamp; // 创建时间戳

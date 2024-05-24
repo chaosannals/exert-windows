@@ -1,0 +1,20 @@
+﻿LIBRARY "wininet"
+EXPORTS
+    InternetConnectA = MyInternetConnectA @1
+    InternetOpenW = MyInternetOpenW @2
+    HttpEndRequestW = MyHttpEndRequestW @3
+    InternetCloseHandle = MyInternetCloseHandle @4
+    HttpSendRequestExW = MyHttpSendRequestExW @5
+    InternetConnectW = MyInternetConnectW @6
+    HttpQueryInfoW=MyHttpQueryInfoW @7
+    HttpAddRequestHeadersW=MyHttpAddRequestHeadersW @8
+    HttpSendRequestW=MyHttpSendRequestW @9
+    InternetSetOptionW=MyInternetSetOptionW @10
+    HttpQueryInfoA=MyHttpQueryInfoA @11
+    HttpOpenRequestW=MyHttpOpenRequestW @12
+    InternetWriteFile=MyInternetWriteFile @13
+    InternetQueryDataAvailable=MyInternetQueryDataAvailable @14
+    InternetOpenUrlW=MyInternetOpenUrlW @15
+    InternetReadFile=MyInternetReadFile @16
+    InternetGetLastResponseInfoW=MyInternetGetLastResponseInfoW @17
+    InternetSetFilePointer=MyInternetSetFilePointer @18
