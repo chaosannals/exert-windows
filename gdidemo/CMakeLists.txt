@@ -3,3 +3,4 @@
 project(gdidemo)
 
 add_subdirectory(simpledemo)
+add_subdirectory(composedemo)
