@@ -1,14 +1,14 @@
-﻿add_executable(composedemo WIN32)
+﻿add_executable(cpprxdemo)
 
 target_sources(
-    composedemo
+    cpprxdemo
     PRIVATE
     "main.cpp"
-    "compose.cpp"
 )
 
+
 target_link_libraries(
-    composedemo
+    cpprxdemo
     PRIVATE
     rxcpp
 )

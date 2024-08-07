@@ -3,12 +3,21 @@
 TCHAR szWindowClass[] = TEXT("GDI COMPOSE DEMO STAR WND CLASS NAME");
 TCHAR szTitle[] = TEXT("GDI COMPOSE Demo Simple");
 
+
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
     case WM_CREATE:
         break;
+    case WM_PAINT: {
+        PAINTSTRUCT ps;
+        HDC hdc = BeginPaint(hWnd, &ps);
+
+        EndPaint(hWnd, &ps);
+        break;
+    }
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
