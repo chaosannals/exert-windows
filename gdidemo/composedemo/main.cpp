@@ -1,4 +1,4 @@
-﻿#include "compose.h"
+﻿#include "wnd.h"
 
 int APIENTRY WinMain(_In_ HINSTANCE hInstance,
     _In_opt_ HINSTANCE hPrevInstance,

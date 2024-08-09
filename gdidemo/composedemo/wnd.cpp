@@ -1,4 +1,4 @@
-﻿#include "compose.h"
+﻿#include "wnd.h"
 
 TCHAR szWindowClass[] = TEXT("GDI COMPOSE DEMO STAR WND CLASS NAME");
 TCHAR szTitle[] = TEXT("GDI COMPOSE Demo Simple");
